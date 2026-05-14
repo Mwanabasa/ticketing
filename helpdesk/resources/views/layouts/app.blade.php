@@ -60,7 +60,7 @@
         </main>
 
         <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
-            Student IT Help Desk — coursework demo
+            Student IT Help Desk
         </footer>
     </div>
 </body>

@@ -31,10 +31,5 @@
                 @endif
             @endguest
         </div>
-        <p class="mt-12 rounded-lg border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-600 shadow-sm">
-            <span class="font-medium text-slate-800">Demo logins (after <code class="rounded bg-slate-100 px-1">php artisan migrate --seed</code>):</span><br>
-            Staff — <code class="text-slate-900">support@helpdesk.test</code> / <code class="text-slate-900">password</code><br>
-            Student — <code class="text-slate-900">student@helpdesk.test</code> / <code class="text-slate-900">password</code>
-        </p>
     </div>
 @endsection
