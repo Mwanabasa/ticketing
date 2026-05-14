@@ -56,6 +56,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Asset URL
+    |--------------------------------------------------------------------------
+    |
+    | When your application is served from a subdirectory (for example under
+    | XAMPP as http://localhost/project/public), set ASSET_URL to that same
+    | base URL so Vite styles and scripts resolve correctly. Leave null when
+    | the web server's document root points directly at the "public" folder.
+    |
+    */
+
+    'asset_url' => env('ASSET_URL'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

@@ -1,10 +1,19 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import tailwindcss from '@tailwindcss/vite';
 
-export default defineConfig({
-    plugins: [
+export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, process.cwd(), '');
+    const assetUrl = (env.ASSET_URL ?? '').trim();
+    const pathname = assetUrl
+        ? new URL(assetUrl.endsWith('/') ? assetUrl : `${assetUrl}/`).pathname.replace(/\/$/, '')
+        : '';
+    const base = pathname ? `${pathname}/build/` : '/build/';
+
+    return {
+        base,
+        plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
@@ -15,10 +24,11 @@ export default defineConfig({
             ],
         }),
         tailwindcss(),
-    ],
-    server: {
-        watch: {
-            ignored: ['**/storage/framework/views/**'],
+        ],
+        server: {
+            watch: {
+                ignored: ['**/storage/framework/views/**'],
+            },
         },
-    },
+    };
 });
