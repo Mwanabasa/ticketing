@@ -4,9 +4,9 @@
 
 @section('content')
     <h1 class="text-2xl font-bold text-slate-900">All tickets</h1>
-    <p class="mt-1 text-slate-600">Search and filter the queue.</p>
+    <p class="mt-1 text-slate-600">Search, filter, assign, and update the queue.</p>
 
-    <form method="GET" action="{{ route('admin.tickets.index') }}" class="mt-8 grid gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+    <form method="GET" action="{{ route('admin.tickets.index') }}" class="mt-8 grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
             <label for="q" class="block text-xs font-medium uppercase text-slate-500">Search</label>
             <input id="q" name="q" type="search" value="{{ request('q') }}" placeholder="Subject, body, or ID"
@@ -16,8 +16,8 @@
             <label for="status" class="block text-xs font-medium uppercase text-slate-500">Status</label>
             <select id="status" name="status" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                 <option value="">Any</option>
-                @foreach (\App\Enums\TicketStatus::cases() as $s)
-                    <option value="{{ $s->value }}" @selected(request('status') === $s->value)>{{ $s->label() }}</option>
+                @foreach (\App\Enums\TicketStatus::cases() as $status)
+                    <option value="{{ $status->value }}" @selected(request('status') === $status->value)>{{ $status->label() }}</option>
                 @endforeach
             </select>
         </div>
@@ -25,8 +25,8 @@
             <label for="category_id" class="block text-xs font-medium uppercase text-slate-500">Category</label>
             <select id="category_id" name="category_id" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                 <option value="">Any</option>
-                @foreach ($categories as $c)
-                    <option value="{{ $c->id }}" @selected((string) request('category_id') === (string) $c->id)>{{ $c->name }}</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category->id }}" @selected((string) request('category_id') === (string) $category->id)>{{ $category->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -46,34 +46,56 @@
         </div>
     </form>
 
-    <div class="mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="mt-8 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
         <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
             <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <tr>
                     <th class="px-4 py-3">Ticket</th>
                     <th class="px-4 py-3">Student</th>
                     <th class="px-4 py-3">Category</th>
-                    <th class="px-4 py-3">Assignee</th>
-                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3">Manage</th>
+                    <th class="px-4 py-3">Updated</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse ($tickets as $ticket)
                     <tr class="hover:bg-slate-50/80">
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-3 align-top">
                             <a href="{{ route('admin.tickets.show', $ticket) }}" class="font-medium text-slate-900 hover:underline">
                                 #{{ $ticket->id }}
                             </a>
-                            <div class="text-xs text-slate-500">{{ Str::limit($ticket->subject, 40) }}</div>
-                        </td>
-                        <td class="px-4 py-3 text-slate-700">{{ $ticket->user->name }}</td>
-                        <td class="px-4 py-3 text-slate-600">{{ $ticket->category->name }}</td>
-                        <td class="px-4 py-3 text-slate-600">{{ $ticket->assignee?->name ?? '—' }}</td>
-                        <td class="px-4 py-3">
-                            <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium {{ $ticket->status->badgeClass() }}">
+                            <div class="mt-1 max-w-xs text-xs text-slate-500">{{ Str::limit($ticket->subject, 56) }}</div>
+                            <span class="mt-2 inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium {{ $ticket->status->badgeClass() }}">
                                 {{ $ticket->status->label() }}
                             </span>
                         </td>
+                        <td class="px-4 py-3 align-top text-slate-700">{{ $ticket->user->name }}</td>
+                        <td class="px-4 py-3 align-top text-slate-600">{{ $ticket->category->name }}</td>
+                        <td class="px-4 py-3 align-top">
+                            <form method="POST" action="{{ route('admin.tickets.update', $ticket) }}" class="grid gap-2 sm:grid-cols-[minmax(8rem,1fr)_minmax(10rem,1fr)_auto]">
+                                @csrf
+                                @method('PATCH')
+                                <label class="sr-only" for="status-{{ $ticket->id }}">Status</label>
+                                <select id="status-{{ $ticket->id }}" name="status" class="rounded-md border border-slate-300 px-3 py-2 text-sm">
+                                    @foreach (\App\Enums\TicketStatus::cases() as $status)
+                                        <option value="{{ $status->value }}" @selected($ticket->status === $status)>{{ $status->label() }}</option>
+                                    @endforeach
+                                </select>
+
+                                <label class="sr-only" for="assigned-to-{{ $ticket->id }}">Assignee</label>
+                                <select id="assigned-to-{{ $ticket->id }}" name="assigned_to" class="rounded-md border border-slate-300 px-3 py-2 text-sm">
+                                    <option value="">Unassigned</option>
+                                    @foreach ($staff as $member)
+                                        <option value="{{ $member->id }}" @selected($ticket->assigned_to === $member->id)>{{ $member->name }}</option>
+                                    @endforeach
+                                </select>
+
+                                <button type="submit" class="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+                                    Save
+                                </button>
+                            </form>
+                        </td>
+                        <td class="px-4 py-3 align-top text-slate-500">{{ $ticket->updated_at->diffForHumans() }}</td>
                     </tr>
                 @empty
                     <tr>
