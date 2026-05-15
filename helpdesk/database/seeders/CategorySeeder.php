@@ -10,10 +10,15 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $rows = [
-            ['name' => 'WiFi problem', 'slug' => 'wifi-problem'],
-            ['name' => 'Portal issue', 'slug' => 'portal-issue'],
-            ['name' => 'Password reset', 'slug' => 'password-reset'],
-            ['name' => 'Computer lab issue', 'slug' => 'computer-lab-issue'],
+            ['name' => 'IT Support', 'slug' => 'it-support'],
+            ['name' => 'Facilities Maintenance', 'slug' => 'facilities-maintenance'],
+            ['name' => 'Grades & Records', 'slug' => 'grades-records'],
+            ['name' => 'Attendance', 'slug' => 'attendance'],
+            ['name' => 'Transportation', 'slug' => 'transportation'],
+            ['name' => 'Health Services', 'slug' => 'health-services'],
+            ['name' => 'Financial/Billing', 'slug' => 'financial-billing'],
+            ['name' => 'Security & Safety', 'slug' => 'security-safety'],
+            ['name' => 'General Inquiry', 'slug' => 'general-inquiry'],
         ];
 
         foreach ($rows as $row) {
