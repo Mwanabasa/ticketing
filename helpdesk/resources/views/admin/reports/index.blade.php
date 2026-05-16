@@ -17,7 +17,7 @@
             <input id="to" name="to" type="date" value="{{ optional($to)->format('Y-m-d') }}"
                 class="mt-1 rounded-md border border-slate-300 px-3 py-2 text-sm">
         </div>
-        <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Update report</button>
+        <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Update report</button>
         <a href="{{ route('admin.reports.index') }}" class="text-sm text-slate-600 underline">Clear dates</a>
     </form>
 
@@ -68,7 +68,7 @@
                     @forelse ($recentResolved as $t)
                         <tr>
                             <td class="px-4 py-3">
-                                <a href="{{ route('admin.tickets.show', $t) }}" class="font-medium text-slate-900 hover:underline">#{{ $t->id }}</a>
+                                <a href="{{ route('admin.tickets.show', $t) }}" class="font-medium text-slate-900">#{{ $t->id }}</a>
                                 <div class="text-xs text-slate-500">{{ Str::limit($t->subject, 36) }}</div>
                             </td>
                             <td class="px-4 py-3">{{ $t->user->name }}</td>

@@ -31,14 +31,14 @@
         <div>
             <label for="attachment" class="block text-sm font-medium text-slate-700">Screenshot (optional)</label>
             <input id="attachment" name="attachment" type="file" accept="image/*"
-                class="mt-1 block w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-slate-800 hover:file:bg-slate-200">
+                class="mt-1 block w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-slate-800">
             <p class="mt-1 text-xs text-slate-500">PNG, JPG, GIF or WebP. Max 4 MB.</p>
         </div>
         <div class="flex gap-3">
-            <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+            <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
                 Submit ticket
             </button>
-            <a href="{{ route('student.tickets.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancel</a>
+            <a href="{{ route('student.tickets.index') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700">Cancel</a>
         </div>
     </form>
 @endsection

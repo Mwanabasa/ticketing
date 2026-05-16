@@ -29,7 +29,7 @@
                 <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password"
                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500">
             </div>
-            <button type="submit" class="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+            <button type="submit" class="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white">
                 Create account
             </button>
         </form>

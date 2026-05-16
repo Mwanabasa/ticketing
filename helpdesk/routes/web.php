@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\AdminTicketController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\StaffDashboardController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentTicketController;
 use Illuminate\Support\Facades\Route;
@@ -31,7 +32,13 @@ Route::middleware(['auth', 'role:student'])->group(function (): void {
     Route::post('/tickets/{ticket}/replies', [StudentTicketController::class, 'reply'])->name('student.tickets.replies.store');
 });
 
-Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->group(function (): void {
+Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function (): void {
+    Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/tickets/{ticket}', [AdminTicketController::class, 'show'])->name('tickets.show');
+    Route::post('/tickets/{ticket}/replies', [AdminTicketController::class, 'reply'])->name('tickets.replies.store');
+});
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/tickets', [AdminTicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/{ticket}', [AdminTicketController::class, 'show'])->name('tickets.show');

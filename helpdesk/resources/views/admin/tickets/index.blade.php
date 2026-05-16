@@ -37,7 +37,7 @@
                     ? route('admin.tickets.index', request()->except('status', 'page'))
                     : route('admin.tickets.index', array_merge(request()->except('page'), ['status' => $tab['value']]));
             @endphp
-            <a href="{{ $url }}" class="rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm {{ $isActive ? 'bg-rose-600 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50' }}">
+            <a href="{{ $url }}" class="rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm {{ $isActive ? 'bg-white text-emerald-700 ring-1 ring-emerald-200' : 'bg-white text-slate-700 ring-1 ring-slate-200' }}">
                 {{ $tab['label'] }}
             </a>
         @endforeach
@@ -80,8 +80,8 @@
             </div>
         </div>
         <div class="mt-4 flex flex-wrap items-center gap-3">
-            <button type="submit" class="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">Apply filters</button>
-            <a href="{{ route('admin.tickets.index') }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reset</a>
+            <button type="submit" class="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm">Apply filters</button>
+            <a href="{{ route('admin.tickets.index') }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">Reset</a>
         </div>
     </form>
 
@@ -99,9 +99,9 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
                     @forelse ($tickets as $ticket)
-                        <tr class="hover:bg-slate-50/80">
+                        <tr>
                             <td class="px-5 py-4 align-top">
-                                <a href="{{ route('admin.tickets.show', $ticket) }}" class="font-semibold text-slate-950 hover:underline">
+                                <a href="{{ route('admin.tickets.show', $ticket) }}" class="font-semibold text-slate-950">
                                     #{{ $ticket->id }} - {{ Str::limit($ticket->subject, 56) }}
                                 </a>
                                 <div class="mt-2">
@@ -134,7 +134,7 @@
                                         @endforeach
                                     </select>
 
-                                    <button type="submit" class="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+                                    <button type="submit" class="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm">
                                         Save
                                     </button>
                                 </form>

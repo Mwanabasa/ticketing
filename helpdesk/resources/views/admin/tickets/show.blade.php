@@ -4,7 +4,7 @@
 
 @section('content')
     <p class="text-sm text-slate-500">
-        <a href="{{ route('admin.tickets.index') }}" class="font-medium text-slate-700 underline">← All tickets</a>
+        <a href="{{ auth()->user()->isAdmin() ? route('admin.tickets.index') : route('staff.dashboard') }}" class="font-medium text-slate-700 underline">← Back</a>
     </p>
 
     <div class="mt-4 flex flex-wrap items-start justify-between gap-4">
@@ -52,23 +52,20 @@
                 </ul>
             </section>
 
-            <form method="POST" action="{{ route('admin.tickets.replies.store', $ticket) }}" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <form method="POST" action="{{ auth()->user()->isAdmin() ? route('admin.tickets.replies.store', $ticket) : route('staff.tickets.replies.store', $ticket) }}" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 @csrf
                 <h2 class="text-sm font-semibold text-slate-900">Reply to student</h2>
                 <textarea name="body" rows="4" required class="mt-3 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" placeholder="Your message…">{{ old('body') }}</textarea>
-                <button type="submit" class="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Send reply</button>
+                <button type="submit" class="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Send reply</button>
             </form>
         </div>
 
-        <aside class="space-y-6">
-            <form method="POST" action="{{ route('admin.tickets.update', $ticket) }}" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                @csrf
-                @method('PATCH')
-                <h2 class="text-sm font-semibold text-slate-900">Manage ticket</h2>
-
-                <div class="mt-4">
-                    <label for="status" class="block text-xs font-medium uppercase text-slate-500">Status</label>
-                    <select id="status" name="status" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+        @if (auth()->user()->isAdmin())
+            <aside class="space-y-6">
+                <form method="POST" action="{{ route('admin.tickets.update', $ticket) }}" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                    @csrf
+                    @method('PATCH')
+                    <h2 class="text-sm font-semibold text-slate-900">Manage ticket</h2>
                         @foreach (\App\Enums\TicketStatus::cases() as $s)
                             <option value="{{ $s->value }}" @selected(old('status', $ticket->status->value) === $s->value)>{{ $s->label() }}</option>
                         @endforeach
@@ -85,8 +82,9 @@
                     </select>
                 </div>
 
-                <button type="submit" class="mt-6 w-full rounded-lg bg-slate-900 py-2 text-sm font-semibold text-white hover:bg-slate-800">Save changes</button>
+                <button type="submit" class="mt-6 w-full rounded-lg bg-slate-900 py-2 text-sm font-semibold text-white">Save changes</button>
             </form>
         </aside>
+        @endif
     </div>
 @endsection

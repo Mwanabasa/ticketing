@@ -13,7 +13,7 @@
                     Track your support requests, see who is assigned, and continue conversations from one place.
                 </p>
             </div>
-            <a href="{{ route('student.tickets.create') }}" class="inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+            <a href="{{ route('student.tickets.create') }}" class="inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm">
                 New support ticket
             </a>
         </div>
@@ -56,7 +56,7 @@
                 </div>
                 <p class="mt-1 text-sm text-slate-500">Your latest requests and their current progress.</p>
             </div>
-            <a href="{{ route('student.tickets.index') }}" class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+            <a href="{{ route('student.tickets.index') }}" class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">
                 View all
             </a>
         </div>
@@ -65,7 +65,7 @@
             <div class="p-10 text-center">
                 <p class="text-sm font-medium text-slate-700">You have not submitted any tickets yet.</p>
                 <p class="mt-1 text-sm text-slate-500">Create your first ticket when you need help from support.</p>
-                <a href="{{ route('student.tickets.create') }}" class="mt-5 inline-flex rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+                <a href="{{ route('student.tickets.create') }}" class="mt-5 inline-flex rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white">
                     Create your first ticket
                 </a>
             </div>
@@ -83,9 +83,9 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
                         @foreach ($recentTickets as $ticket)
-                            <tr class="hover:bg-slate-50/80">
+                            <tr>
                                 <td class="px-5 py-4">
-                                    <a href="{{ route('student.tickets.show', $ticket) }}" class="font-semibold text-slate-950 hover:underline">
+                                    <a href="{{ route('student.tickets.show', $ticket) }}" class="font-semibold text-slate-950">
                                         #{{ $ticket->id }} - {{ Str::limit($ticket->subject, 48) }}
                                     </a>
                                 </td>

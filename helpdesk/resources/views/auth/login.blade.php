@@ -23,7 +23,7 @@
                 <input id="remember" name="remember" type="checkbox" value="1" class="rounded border-slate-300 text-slate-900 focus:ring-slate-500">
                 <label for="remember" class="text-sm text-slate-600">Remember me</label>
             </div>
-            <button type="submit" class="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+            <button type="submit" class="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-semibold text-white">
                 Log in
             </button>
         </form>

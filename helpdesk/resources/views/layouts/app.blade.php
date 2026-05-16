@@ -11,17 +11,23 @@
     @auth
         @php
             $user = auth()->user();
-            $navItems = $user->isStaff()
-                ? [
+            if ($user->isAdmin()) {
+                $navItems = [
                     ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'active' => 'admin.dashboard'],
                     ['label' => 'All tickets', 'route' => 'admin.tickets.index', 'active' => 'admin.tickets.*'],
                     ['label' => 'Reports', 'route' => 'admin.reports.index', 'active' => 'admin.reports.*'],
-                ]
-                : [
+                ];
+            } elseif ($user->isStaff()) {
+                $navItems = [
+                    ['label' => 'Dashboard', 'route' => 'staff.dashboard', 'active' => 'staff.dashboard'],
+                ];
+            } else {
+                $navItems = [
                     ['label' => 'Dashboard', 'route' => 'student.dashboard', 'active' => 'student.dashboard'],
                     ['label' => 'My tickets', 'route' => 'student.tickets.index', 'active' => 'student.tickets.index'],
                     ['label' => 'New ticket', 'route' => 'student.tickets.create', 'active' => 'student.tickets.create'],
                 ];
+            }
         @endphp
 
         <div class="min-h-full p-3 sm:p-6">
@@ -35,7 +41,7 @@
 
                     <nav class="flex-1 space-y-1 px-3">
                         @foreach ($navItems as $item)
-                            <a href="{{ route($item['route']) }}" class="flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold transition {{ request()->routeIs($item['active']) ? 'bg-rose-600 text-white shadow-lg shadow-rose-950/20' : 'text-indigo-100 hover:bg-white/10 hover:text-white' }}">
+                            <a href="{{ route($item['route']) }}" class="flex items-center justify-between rounded-lg px-4 py-3 text-sm font-semibold transition {{ request()->routeIs($item['active']) ? 'bg-rose-600 text-white shadow-lg shadow-rose-950/20' : 'text-indigo-100' }}">
                                 <span>{{ $item['label'] }}</span>
                                 @if (request()->routeIs($item['active']))
                                     <span class="size-2 rounded-full bg-white"></span>
@@ -53,25 +59,27 @@
                 </aside>
 
                 <div class="flex min-w-0 flex-1 flex-col">
-                    <header class="bg-gradient-to-r from-indigo-600 to-sky-500 px-4 py-4 text-white sm:px-6">
+                    <header class="bg-white px-4 py-4 sm:px-6">
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <p class="text-xs font-semibold uppercase tracking-wide text-white/70">{{ $user->isStaff() ? 'Staff workspace' : 'Student workspace' }}</p>
-                                <h1 class="mt-1 text-2xl font-bold tracking-tight">@yield('page_title', 'Dashboard')</h1>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    {{ $user->isAdmin() ? 'Admin workspace' : ($user->isStaff() ? 'Staff workspace' : 'Student workspace') }}
+                                </p>
+                                <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-950">@yield('page_title', 'Dashboard')</h1>
                             </div>
 
                             <div class="flex flex-wrap items-center gap-2 text-sm">
                                 <nav class="flex flex-wrap gap-1 lg:hidden">
                                     @foreach ($navItems as $item)
-                                        <a href="{{ route($item['route']) }}" class="rounded-lg px-3 py-2 font-semibold {{ request()->routeIs($item['active']) ? 'bg-white text-indigo-700' : 'bg-white/10 text-white hover:bg-white/20' }}">
+                                        <a href="{{ route($item['route']) }}" class="rounded-lg px-3 py-2 font-semibold {{ request()->routeIs($item['active']) ? 'bg-slate-100 text-slate-950' : 'bg-transparent text-slate-600' }}">
                                             {{ $item['label'] }}
                                         </a>
                                     @endforeach
                                 </nav>
-                                <span class="hidden rounded-full bg-white/15 px-3 py-2 font-semibold sm:inline">{{ $user->name }}</span>
+                                <span class="hidden rounded-full bg-slate-100 px-3 py-2 font-semibold text-slate-950 sm:inline">{{ $user->name }}</span>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit" class="rounded-lg bg-white/15 px-3 py-2 font-semibold hover:bg-white/25">Log out</button>
+                                    <button type="submit" class="rounded-lg bg-slate-100 px-3 py-2 font-semibold text-slate-950">Log out</button>
                                 </form>
                             </div>
                         </div>
@@ -107,8 +115,8 @@
                         {{ config('app.name') }}
                     </a>
                     <nav class="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-600">
-                        <a href="{{ route('login') }}" class="rounded-lg px-3 py-2 hover:bg-slate-100 hover:text-slate-950">Log in</a>
-                        <a href="{{ route('register') }}" class="rounded-lg bg-slate-950 px-3 py-2 text-white shadow-sm hover:bg-slate-800">Register</a>
+                        <a href="{{ route('login') }}" class="rounded-lg px-3 py-2 text-slate-950">Log in</a>
+                        <a href="{{ route('register') }}" class="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow">Register</a>
                     </nav>
                 </div>
             </header>

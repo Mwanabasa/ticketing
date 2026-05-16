@@ -36,9 +36,11 @@ class LoginController extends Controller
         $user = Auth::user();
 
         return redirect()->intended(
-            $user->isStaff()
+            $user->isAdmin()
                 ? route('admin.dashboard')
-                : route('student.dashboard')
+                : ($user->isStaff()
+                    ? route('staff.dashboard')
+                    : route('student.dashboard'))
         );
     }
 

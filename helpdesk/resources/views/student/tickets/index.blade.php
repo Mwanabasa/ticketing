@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 class="text-2xl font-bold text-slate-900">My tickets</h1>
-        <a href="{{ route('student.tickets.create') }}" class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+        <a href="{{ route('student.tickets.create') }}" class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
             New ticket
         </a>
     </div>
@@ -25,9 +25,9 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @foreach ($tickets as $ticket)
-                        <tr class="hover:bg-slate-50/80">
+                        <tr>
                             <td class="px-4 py-3">
-                                <a href="{{ route('student.tickets.show', $ticket) }}" class="font-medium text-slate-900 hover:underline">
+                                <a href="{{ route('student.tickets.show', $ticket) }}" class="font-medium text-slate-900">
                                     #{{ $ticket->id }} — {{ Str::limit($ticket->subject, 48) }}
                                 </a>
                             </td>

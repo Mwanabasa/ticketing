@@ -60,7 +60,7 @@
                 <label for="body" class="block text-sm font-medium text-slate-700">Your reply</label>
                 <textarea id="body" name="body" rows="4" required class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500" placeholder="Add details or answer staff questions…">{{ old('body') }}</textarea>
             </div>
-            <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Send reply</button>
+            <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Send reply</button>
         </form>
     @else
         @if ($ticket->status === \App\Enums\TicketStatus::Closed)

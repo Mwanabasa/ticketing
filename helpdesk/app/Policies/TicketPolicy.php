@@ -10,7 +10,15 @@ class TicketPolicy
 {
     public function view(User $user, Ticket $ticket): bool
     {
-        return $user->isStaff() || $ticket->user_id === $user->id;
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if ($user->isStaff()) {
+            return $ticket->assigned_to === $user->id;
+        }
+
+        return $ticket->user_id === $user->id;
     }
 
     public function replyAsStudent(User $user, Ticket $ticket): bool
@@ -24,6 +32,10 @@ class TicketPolicy
 
     public function manage(User $user, Ticket $ticket): bool
     {
-        return $user->isStaff();
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $user->isStaff() && $ticket->assigned_to === $user->id;
     }
 }
