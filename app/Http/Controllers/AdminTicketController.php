@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
 use App\Enums\UserRole;
+use App\Http\Requests\ReplyRequest;
+use App\Http\Requests\UpdateTicketRequest;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -98,7 +101,7 @@ class AdminTicketController extends Controller
         return view('admin.tickets.show', compact('ticket', 'staff'));
     }
 
-    public function update(Request $request, Ticket $ticket): RedirectResponse
+    public function update(UpdateTicketRequest $request, Ticket $ticket): RedirectResponse
     {
         $this->authorize('manage', $ticket);
 
@@ -106,10 +109,7 @@ class AdminTicketController extends Controller
             $request->merge(['assigned_to' => null]);
         }
 
-        $validated = $request->validate([
-            'status' => ['required', Rule::enum(TicketStatus::class)],
-            'assigned_to' => ['nullable', 'exists:users,id'],
-        ]);
+        $validated = $request->validated();
 
         if ($validated['assigned_to'] ?? null) {
             $assignee = User::query()->findOrFail($validated['assigned_to']);
@@ -120,19 +120,18 @@ class AdminTicketController extends Controller
 
         $ticket->update([
             'status' => $validated['status'],
+            'priority' => $validated['priority'],
             'assigned_to' => $validated['assigned_to'] ?? null,
         ]);
 
         return back()->with('status', 'Ticket updated.');
     }
 
-    public function reply(Request $request, Ticket $ticket): RedirectResponse
+    public function reply(ReplyRequest $request, Ticket $ticket): RedirectResponse
     {
         $this->authorize('manage', $ticket);
 
-        $validated = $request->validate([
-            'body' => ['required', 'string', 'max:10000'],
-        ]);
+        $validated = $request->validated();
 
         $ticket->replies()->create([
             'user_id' => $request->user()->id,
@@ -144,5 +143,85 @@ class AdminTicketController extends Controller
         }
 
         return back()->with('status', 'Reply posted.');
+    }
+
+    public function bulkUpdate(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ticket_ids' => ['required', 'array'],
+            'ticket_ids.*' => ['exists:tickets,id'],
+            'action' => ['required', 'in:assign_status,assign_priority,close'],
+            'status' => ['nullable', Rule::enum(TicketStatus::class)],
+            'priority' => ['nullable', Rule::enum(TicketPriority::class)],
+            'assigned_to' => ['nullable', 'exists:users,id'],
+        ]);
+
+        $tickets = Ticket::query()->whereIn('id', $validated['ticket_ids'])->get();
+
+        foreach ($tickets as $ticket) {
+            $this->authorize('manage', $ticket);
+
+            match ($validated['action']) {
+                'assign_status' => $ticket->update([
+                    'status' => $validated['status'] ?? $ticket->status,
+                ]),
+                'assign_priority' => $ticket->update([
+                    'priority' => $validated['priority'] ?? $ticket->priority,
+                ]),
+                'close' => $ticket->update([
+                    'status' => TicketStatus::Closed,
+                ]),
+            };
+        }
+
+        return back()->with('status', count($tickets).' tickets updated.');
+    }
+
+    public function merge(Request $request): RedirectResponse
+    {
+        // Support both a raw comma-separated string (from the UI form) and a pre-built array
+        if ($request->filled('merge_ids_raw') && ! $request->has('source_ticket_ids')) {
+            $ids = array_filter(array_map('trim', explode(',', $request->input('merge_ids_raw'))));
+            $request->merge(['source_ticket_ids' => $ids]);
+        }
+
+        $validated = $request->validate([
+            'source_ticket_ids' => ['required', 'array', 'min:1'],
+            'source_ticket_ids.*' => ['exists:tickets,id'],
+            'target_ticket_id' => ['required', 'exists:tickets,id'],
+        ]);
+
+        $targetTicket = Ticket::query()->findOrFail($validated['target_ticket_id']);
+        $this->authorize('manage', $targetTicket);
+
+        // Filter out the target ticket if accidentally included in source list
+        $sourceIds = array_filter(
+            $validated['source_ticket_ids'],
+            fn ($id) => (int) $id !== (int) $validated['target_ticket_id']
+        );
+
+        if (empty($sourceIds)) {
+            return back()->withErrors(['merge_ids_raw' => 'No valid source tickets to merge.']);
+        }
+
+        $sourceTickets = Ticket::query()->whereIn('id', $sourceIds)->get();
+
+        foreach ($sourceTickets as $sourceTicket) {
+            $this->authorize('manage', $sourceTicket);
+
+            // Move replies to target ticket
+            $sourceTicket->replies()->update(['ticket_id' => $targetTicket->id]);
+
+            // Move time entries to target ticket
+            $sourceTicket->timeEntries()->update(['ticket_id' => $targetTicket->id]);
+
+            // Close source ticket
+            $sourceTicket->update([
+                'status' => TicketStatus::Closed,
+                'description' => $sourceTicket->description."\n\n[Merged into ticket #{$targetTicket->id}]",
+            ]);
+        }
+
+        return back()->with('status', count($sourceTickets).' tickets merged into #'.$targetTicket->id.'.');
     }
 }

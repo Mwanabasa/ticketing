@@ -16,20 +16,31 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(CategorySeeder::class);
 
+        $staffMembers = [
+            ['name' => 'IT Support',       'email' => 'support@helpdesk.test'],
+            ['name' => 'Alice Mensah',     'email' => 'alice@helpdesk.test'],
+            ['name' => 'Bob Asante',       'email' => 'bob@helpdesk.test'],
+            ['name' => 'Clara Owusu',      'email' => 'clara@helpdesk.test'],
+        ];
+
+        foreach ($staffMembers as $staff) {
+            User::query()->updateOrCreate(
+                ['email' => $staff['email']],
+                [
+                    'name'     => $staff['name'],
+                    'password' => Hash::make('password'),
+                    'role'     => UserRole::Staff,
+                ]
+            );
+        }
+
         User::query()->updateOrCreate(
-            ['email' => 'support@helpdesk.test'],
+            ['email' => 'student@helpdesk.test'],
             [
-                'name' => 'IT Support',
+                'name'     => 'Demo Student',
                 'password' => Hash::make('password'),
-                'role' => UserRole::Staff,
+                'role'     => UserRole::Student,
             ]
         );
-
-        User::factory()->create([
-            'name' => 'Demo Student',
-            'email' => 'student@helpdesk.test',
-            'password' => Hash::make('password'),
-            'role' => UserRole::Student,
-        ]);
     }
 }

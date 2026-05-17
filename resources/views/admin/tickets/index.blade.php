@@ -123,17 +123,51 @@
                 </form>
             </div>
 
+            <div id="bulk-bar" class="hidden border-b border-amber-200 bg-amber-50 px-4 py-3">
+                <form method="POST" action="{{ route('admin.tickets.bulk') }}" id="bulk-form">
+                    @csrf
+                    <div id="bulk-ids"></div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span id="bulk-count" class="text-sm font-semibold text-amber-800">0 selected</span>
+                        <select name="action" class="rounded-xl border border-amber-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none">
+                            <option value="assign_status">Change status</option>
+                            <option value="assign_priority">Change priority</option>
+                            <option value="close">Close tickets</option>
+                        </select>
+                        <select name="status" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none">
+                            @foreach (\App\Enums\TicketStatus::cases() as $s)
+                                <option value="{{ $s->value }}">{{ $s->label() }}</option>
+                            @endforeach
+                        </select>
+                        <select name="priority" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none">
+                            @foreach (\App\Enums\TicketPriority::cases() as $p)
+                                <option value="{{ $p->value }}">{{ $p->label() }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 transition">
+                            Apply to selected
+                        </button>
+                        <button type="button" onclick="clearSelection()" class="text-sm text-amber-700 underline">Clear</button>
+                    </div>
+                </form>
+            </div>
+
             <div class="divide-y divide-slate-100">
                 @forelse ($tickets as $ticket)
                     @php
                         $isSelected = $previewTicket?->id === $ticket->id;
                         $previewParams = array_merge(request()->except('page'), ['ticket' => $ticket->id]);
                     @endphp
-                    <article class="grid gap-4 p-4 hover:bg-slate-50/80 {{ $isSelected ? 'bg-cyan-50/70 ring-1 ring-inset ring-cyan-200' : '' }} lg:grid-cols-[minmax(0,1fr)_22rem]">
+                    <article class="grid gap-4 p-4 hover:bg-slate-50/80 {{ $isSelected ? 'bg-cyan-50/70 ring-1 ring-inset ring-cyan-200' : '' }} lg:grid-cols-[2rem_minmax(0,1fr)_22rem]">
+                        <div class="flex items-start pt-1">
+                            <input type="checkbox" class="ticket-checkbox rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                   data-id="{{ $ticket->id }}" onchange="updateBulkBar()">
+                        </div>
                         <a href="{{ route('admin.tickets.index', $previewParams) }}" class="min-w-0">
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="font-bold text-slate-950">#{{ $ticket->id }}</span>
                                 <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $ticket->status->badgeClass() }}">{{ $ticket->status->label() }}</span>
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $ticket->priority->badgeClass() }}">{{ $ticket->priority->label() }}</span>
                                 <span class="text-xs font-medium text-slate-400">{{ $ticket->updated_at->diffForHumans() }}</span>
                             </div>
                             <h3 class="mt-2 truncate text-base font-semibold text-slate-950">{{ $ticket->subject }}</h3>
@@ -145,13 +179,20 @@
                             </div>
                         </a>
 
-                        <form method="POST" action="{{ route('admin.tickets.update', $ticket) }}" class="grid content-start gap-2 sm:grid-cols-[1fr_1fr_auto] lg:grid-cols-1 xl:grid-cols-[1fr_1fr_auto]">
+                        <form method="POST" action="{{ route('admin.tickets.update', $ticket) }}" class="grid content-start gap-2 sm:grid-cols-[1fr_1fr_1fr_auto] lg:grid-cols-1 xl:grid-cols-[1fr_1fr_1fr_auto]">
                             @csrf
                             @method('PATCH')
                             <label class="sr-only" for="status-{{ $ticket->id }}">Status</label>
                             <select id="status-{{ $ticket->id }}" name="status" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200">
                                 @foreach (\App\Enums\TicketStatus::cases() as $status)
                                     <option value="{{ $status->value }}" @selected($ticket->status === $status)>{{ $status->label() }}</option>
+                                @endforeach
+                            </select>
+
+                            <label class="sr-only" for="priority-{{ $ticket->id }}">Priority</label>
+                            <select id="priority-{{ $ticket->id }}" name="priority" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                                @foreach (\App\Enums\TicketPriority::cases() as $priority)
+                                    <option value="{{ $priority->value }}" @selected($ticket->priority === $priority)>{{ $priority->label() }}</option>
                                 @endforeach
                             </select>
 
@@ -177,6 +218,38 @@
             <div class="border-t border-slate-200 p-4">{{ $tickets->links() }}</div>
         </section>
 
+        @push('head')
+        <script>
+        function updateBulkBar() {
+            const checked = document.querySelectorAll('.ticket-checkbox:checked');
+            const bar = document.getElementById('bulk-bar');
+            const count = document.getElementById('bulk-count');
+            const idsContainer = document.getElementById('bulk-ids');
+
+            idsContainer.innerHTML = '';
+            checked.forEach(cb => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ticket_ids[]';
+                input.value = cb.dataset.id;
+                idsContainer.appendChild(input);
+            });
+
+            if (checked.length > 0) {
+                bar.classList.remove('hidden');
+                count.textContent = checked.length + ' selected';
+            } else {
+                bar.classList.add('hidden');
+            }
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.ticket-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('bulk-bar').classList.add('hidden');
+            document.getElementById('bulk-ids').innerHTML = '';
+        }
+        </script>
+        @endpush
         <aside class="rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="border-b border-slate-200 p-5">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick preview</p>
@@ -218,6 +291,11 @@
                             <select name="status" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm">
                                 @foreach (\App\Enums\TicketStatus::cases() as $status)
                                     <option value="{{ $status->value }}" @selected($previewTicket->status === $status)>{{ $status->label() }}</option>
+                                @endforeach
+                            </select>
+                            <select name="priority" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm">
+                                @foreach (\App\Enums\TicketPriority::cases() as $priority)
+                                    <option value="{{ $priority->value }}" @selected($previewTicket->priority === $priority)>{{ $priority->label() }}</option>
                                 @endforeach
                             </select>
                             <select name="assigned_to" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm">

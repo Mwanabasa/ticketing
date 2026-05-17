@@ -1,74 +1,98 @@
 @extends('layouts.app')
 
 @section('title', 'Ticket #'.$ticket->id)
+@section('page_title', 'Ticket #'.$ticket->id)
 
 @section('content')
-    <div class="flex flex-wrap items-start justify-between gap-4">
-        <div>
-            <p class="text-sm text-slate-500">Ticket #{{ $ticket->id }}</p>
-            <h1 class="mt-1 text-2xl font-bold text-slate-900">{{ $ticket->subject }}</h1>
-            <p class="mt-2 text-sm text-slate-600">
-                {{ $ticket->category->name }}
-                · Created {{ $ticket->created_at->format('M j, Y g:i A') }}
-            </p>
-        </div>
-        <span class="inline-flex rounded-full px-3 py-1 text-sm font-medium {{ $ticket->status->badgeClass() }}">
-            {{ $ticket->status->label() }}
-        </span>
+    <div class="mb-4">
+        <a href="{{ route('student.tickets.index') }}" class="text-sm font-medium text-indigo-600 hover:underline">← My tickets</a>
     </div>
 
-    @if ($ticket->assignee)
-        <p class="mt-4 text-sm text-slate-600">Assigned to <span class="font-medium text-slate-900">{{ $ticket->assignee->name }}</span></p>
-    @endif
+    {{-- Header card --}}
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm mb-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h1 class="text-xl font-bold text-slate-900">{{ $ticket->subject }}</h1>
+                <p class="mt-1 text-sm text-slate-500">
+                    {{ $ticket->category->name }} · Opened {{ $ticket->created_at->format('M j, Y g:i A') }}
+                </p>
+                @if ($ticket->assignee)
+                    <p class="mt-2 flex items-center gap-1.5 text-sm text-slate-600">
+                        <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center">
+                            {{ strtoupper(substr($ticket->assignee->name, 0, 1)) }}
+                        </span>
+                        Assigned to <span class="font-semibold text-slate-800">{{ $ticket->assignee->name }}</span>
+                    </p>
+                @else
+                    <p class="mt-2 text-sm text-slate-400">Not yet assigned to staff</p>
+                @endif
+            </div>
+            <div class="flex gap-2 shrink-0">
+                <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $ticket->priority->badgeClass() }}">{{ $ticket->priority->label() }}</span>
+                <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $ticket->status->badgeClass() }}">{{ $ticket->status->label() }}</span>
+            </div>
+        </div>
+    </div>
 
+    {{-- Attachment --}}
     @if ($ticket->attachment_path)
-        <div class="mt-6">
-            <h2 class="text-sm font-semibold text-slate-700">Attachment</h2>
-            <a href="{{ asset('storage/'.$ticket->attachment_path) }}" target="_blank" rel="noopener" class="mt-2 inline-block">
-                <img src="{{ asset('storage/'.$ticket->attachment_path) }}" alt="Ticket attachment" class="max-h-64 max-w-full rounded-lg border border-slate-200 object-contain shadow-sm">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm mb-5">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Attachment</p>
+            <a href="{{ asset('storage/'.$ticket->attachment_path) }}" target="_blank" rel="noopener">
+                <img src="{{ asset('storage/'.$ticket->attachment_path) }}" alt="Attachment"
+                     class="max-h-64 max-w-full rounded-xl border border-slate-200 object-contain shadow-sm">
             </a>
         </div>
     @endif
 
-    <div class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Original message</h2>
-        <div class="prose prose-sm mt-3 max-w-none whitespace-pre-wrap text-slate-800">{{ $ticket->description }}</div>
+    {{-- Original description --}}
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm mb-5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Your original message</p>
+        <p class="whitespace-pre-wrap text-sm text-slate-800 leading-relaxed">{{ $ticket->description }}</p>
     </div>
 
-    <section class="mt-10">
-        <h2 class="text-lg font-semibold text-slate-900">Conversation</h2>
-        <ul class="mt-4 space-y-4">
+    {{-- Conversation --}}
+    @if ($ticket->replies->isNotEmpty())
+        <div class="space-y-3 mb-5">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Conversation ({{ $ticket->replies->count() }})</p>
             @foreach ($ticket->replies as $reply)
-                <li class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                    <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
-                        <span class="font-medium text-slate-900">{{ $reply->user->name }}</span>
-                        <span class="text-xs text-slate-500">{{ $reply->created_at->format('M j, Y g:i A') }}</span>
+                <div class="rounded-2xl border p-4 shadow-sm {{ $reply->user->isStaff() ? 'border-indigo-100 bg-indigo-50' : 'border-slate-200 bg-white' }}">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold {{ $reply->user->isStaff() ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700' }}">
+                                {{ strtoupper(substr($reply->user->name, 0, 1)) }}
+                            </div>
+                            <span class="text-sm font-semibold text-slate-900">{{ $reply->user->name }}</span>
+                            @if ($reply->user->isStaff())
+                                <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">Staff</span>
+                            @endif
+                        </div>
+                        <span class="text-xs text-slate-400">{{ $reply->created_at->format('M j, Y g:i A') }}</span>
                     </div>
-                    @if ($reply->user->isStaff())
-                        <span class="mt-1 inline-block rounded bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800">Staff</span>
-                    @endif
-                    <p class="mt-3 whitespace-pre-wrap text-sm text-slate-700">{{ $reply->body }}</p>
-                </li>
+                    <p class="whitespace-pre-wrap text-sm text-slate-700 leading-relaxed">{{ $reply->body }}</p>
+                </div>
             @endforeach
-        </ul>
-    </section>
+        </div>
+    @endif
 
+    {{-- Reply form --}}
     @can('replyAsStudent', $ticket)
-        <form method="POST" action="{{ route('student.tickets.replies.store', $ticket) }}" class="mt-8 max-w-xl space-y-4">
-            @csrf
-            <div>
-                <label for="body" class="block text-sm font-medium text-slate-700">Your reply</label>
-                <textarea id="body" name="body" rows="4" required class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500" placeholder="Add details or answer staff questions…">{{ old('body') }}</textarea>
-            </div>
-            <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Send reply</button>
-        </form>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-sm font-semibold text-slate-900 mb-3">Add a reply</p>
+            <form method="POST" action="{{ route('student.tickets.replies.store', $ticket) }}" class="space-y-3">
+                @csrf
+                <textarea id="body" name="body" rows="4" required placeholder="Add details or answer staff questions…"
+                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">{{ old('body') }}</textarea>
+                <button type="submit" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition">
+                    Send reply
+                </button>
+            </form>
+        </div>
     @else
         @if ($ticket->status === \App\Enums\TicketStatus::Closed)
-            <p class="mt-8 text-sm text-slate-600">This ticket is closed. You cannot add new replies.</p>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-400">
+                This ticket is closed. Please open a new ticket if you need further help.
+            </div>
         @endif
     @endcan
-
-    <p class="mt-10">
-        <a href="{{ route('student.tickets.index') }}" class="text-sm font-medium text-slate-700 underline">← Back to my tickets</a>
-    </p>
 @endsection

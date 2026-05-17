@@ -3,10 +3,13 @@
 namespace App\Providers;
 
 use App\Models\Ticket;
+use App\Models\TicketReply;
+use App\Observers\TicketObserver;
+use App\Observers\TicketReplyObserver;
 use App\Policies\TicketPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Schema;   // <-- Add this line
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Your existing Gate policy
         Gate::policy(Ticket::class, TicketPolicy::class);
+
+        // Register observers for audit logging and email notifications
+        Ticket::observe(TicketObserver::class);
+        TicketReply::observe(TicketReplyObserver::class);
 
         // Configure URL for subdirectory hosting
         $this->configureUrlForSubdirectoryHosting();

@@ -27,7 +27,7 @@ class StudentDashboardController extends Controller
             ->where('user_id', $user->id)
             ->with(['category', 'assignee'])
             ->latest('updated_at')
-            ->limit(6)
+            ->limit(8)
             ->get();
 
         return view('student.dashboard', [
