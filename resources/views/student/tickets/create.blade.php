@@ -15,7 +15,7 @@
                 <div class="flex flex-wrap gap-2">
                     @foreach ($templates as $template)
                         <button type="button"
-                            onclick="applyTemplate({{ $template->id }})"
+                            onclick="applyTemplate({{ $template->id }}, this)"
                             class="template-btn rounded-xl border border-indigo-200 bg-white px-3 py-2 text-xs font-semibold text-indigo-700 shadow-sm hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition">
                             {{ $template->name }}
                         </button>
@@ -82,7 +82,7 @@
         <script>
             const templates = @json($templates->keyBy('id'));
 
-            function applyTemplate(id) {
+            function applyTemplate(id, btn) {
                 const t = templates[id];
                 if (!t) return;
 
@@ -94,12 +94,12 @@
                 }
 
                 // Highlight active template button
-                document.querySelectorAll('.template-btn').forEach(btn => {
-                    btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
-                    btn.classList.add('bg-white', 'text-indigo-700', 'border-indigo-200');
+                document.querySelectorAll('.template-btn').forEach(b => {
+                    b.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
+                    b.classList.add('bg-white', 'text-indigo-700', 'border-indigo-200');
                 });
-                event.target.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
-                event.target.classList.remove('bg-white', 'text-indigo-700', 'border-indigo-200');
+                btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+                btn.classList.remove('bg-white', 'text-indigo-700', 'border-indigo-200');
 
                 document.getElementById('subject').focus();
             }

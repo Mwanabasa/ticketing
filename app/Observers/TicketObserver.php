@@ -19,7 +19,10 @@ class TicketObserver
 
     public function updated(Ticket $ticket): void
     {
-        $this->logAction('updated', $ticket, $ticket->getOriginal(), $ticket->getAttributes());
+        // Cast to JSON-safe scalars — getAttributes() can contain enum objects
+        $old = collect($ticket->getOriginal())->map(fn ($v) => $v instanceof \BackedEnum ? $v->value : $v)->toArray();
+        $new = collect($ticket->getChanges())->map(fn ($v) => $v instanceof \BackedEnum ? $v->value : $v)->toArray();
+        $this->logAction('updated', $ticket, $old ?: null, $new ?: null);
 
         // Send notification if assigned to staff
         if ($ticket->wasChanged('assigned_to') && $ticket->assigned_to) {

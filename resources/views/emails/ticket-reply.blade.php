@@ -17,7 +17,7 @@
             <p style="margin: 0; white-space: pre-wrap; font-size: 14px;">{{ $reply->body }}</p>
         </div>
 
-        <a href="{{ url()->current() }}"
+        <a href="{{ $ticket->user->isStaff() ? route('admin.tickets.show', $ticket) : route('student.tickets.show', $ticket) }}"
            style="display: inline-block; background: #4f46e5; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px;">
             View ticket
         </a>

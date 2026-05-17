@@ -27,10 +27,14 @@
                 @forelse ($articles as $article)
                     <tr class="hover:bg-slate-50">
                         <td class="px-5 py-4">
-                            <a href="{{ route('knowledge-base.show', $article) }}" target="_blank"
+                            <a href="{{ $article->is_published ? route('knowledge-base.show', $article) : route('admin.knowledge-base.edit', $article) }}"
+                               target="{{ $article->is_published ? '_blank' : '_self' }}"
                                class="font-medium text-slate-900 hover:text-indigo-600 hover:underline">
                                 {{ $article->title }}
                             </a>
+                            @unless ($article->is_published)
+                                <span class="ml-1 text-xs text-slate-400">(draft — not public)</span>
+                            @endunless
                         </td>
                         <td class="px-5 py-4 text-slate-500">{{ $article->category?->name ?? '—' }}</td>
                         <td class="px-5 py-4">

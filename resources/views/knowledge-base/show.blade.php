@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $article->title)
+@section('page_title', $article->title)
 
 @section('content')
     <div class="max-w-3xl mx-auto">
