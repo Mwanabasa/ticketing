@@ -107,6 +107,8 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
 
     // Reports
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export/excel', [AdminReportController::class, 'exportExcel'])->name('reports.export.excel');
+    Route::get('/reports/export/pdf', [AdminReportController::class, 'exportPdf'])->name('reports.export.pdf');
 
     // Knowledge base
     Route::get('/knowledge-base', [AdminKnowledgeBaseController::class, 'index'])->name('knowledge-base.index');

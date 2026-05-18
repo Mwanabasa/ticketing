@@ -1,7 +1,7 @@
 @extends('layouts.app')
-
 @section('title', 'Knowledge Base')
 @section('page_title', 'Knowledge Base')
+@section('page_subtitle', 'Find answers to common IT issues')
 
 @section('content')
     <div class="max-w-4xl mx-auto">

@@ -10,34 +10,25 @@
 @section('content')
 
     {{-- Date filter --}}
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-6">
+    <div class="card p-5 mb-6">
         <form method="GET" action="{{ route('admin.reports.index') }}" class="flex flex-wrap items-end gap-4">
             <div>
-                <label for="from" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">From date</label>
-                <input id="from" name="from" type="date" value="{{ optional($from)->format('Y-m-d') }}"
-                       class="rounded-xl border-2 border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-500 transition">
+                <label for="from" class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">From date</label>
+                <input id="from" name="from" type="date" value="{{ optional($from)->format('Y-m-d') }}" class="input py-2.5 text-sm w-auto">
             </div>
             <div>
-                <label for="to" class="block text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">To date</label>
-                <input id="to" name="to" type="date" value="{{ optional($to)->format('Y-m-d') }}"
-                       class="rounded-xl border-2 border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-500 transition">
+                <label for="to" class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">To date</label>
+                <input id="to" name="to" type="date" value="{{ optional($to)->format('Y-m-d') }}" class="input py-2.5 text-sm w-auto">
             </div>
-            <button type="submit"
-                    class="rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5"
-                    style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
-                Apply Filter
-            </button>
+            <button type="submit" class="btn btn-primary">Apply Filter</button>
             @if ($from || $to)
-                <a href="{{ route('admin.reports.index') }}"
-                   class="rounded-xl border-2 border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">
-                    Clear
-                </a>
+                <a href="{{ route('admin.reports.index') }}" class="btn btn-secondary">Clear</a>
             @endif
         </form>
         @error('to') <p class="mt-2 text-xs text-red-600">{{ $message }}</p> @enderror
         @if ($from || $to)
-            <p class="mt-3 text-xs text-indigo-600 font-medium">
-                📅 Showing data {{ $from ? 'from ' . $from->format('M j, Y') : '' }}{{ $from && $to ? ' to ' : '' }}{{ $to ? $to->format('M j, Y') : '' }}
+            <p class="mt-3 text-xs text-indigo-600 font-semibold">
+                📅 Showing data {{ $from ? 'from '.$from->format('M j, Y') : '' }}{{ $from && $to ? ' to ' : '' }}{{ $to ? $to->format('M j, Y') : '' }}
             </p>
         @endif
     </div>
@@ -72,7 +63,7 @@
     <div class="grid gap-5 lg:grid-cols-2 mb-6">
 
         {{-- Status donut --}}
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <div class="card p-6">
             <div class="flex items-center gap-3 mb-5">
                 <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
@@ -110,7 +101,7 @@
         </div>
 
         {{-- Category bar --}}
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <div class="card p-6">
             <div class="flex items-center gap-3 mb-5">
                 <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white" style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
@@ -141,7 +132,7 @@
     </div>
 
     {{-- Staff performance --}}
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+    <div class="card overflow-hidden mb-6">
         <div class="px-6 py-5 border-b border-gray-100" style="background: linear-gradient(135deg, #f8faff, #f3f0ff);">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
@@ -212,7 +203,7 @@
     </div>
 
     {{-- Recently resolved --}}
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="card overflow-hidden">
         <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
             <div>
                 <h3 class="font-bold text-gray-900">Recently Resolved</h3>

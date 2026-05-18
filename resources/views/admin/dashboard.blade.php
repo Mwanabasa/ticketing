@@ -11,22 +11,22 @@
 @section('content')
 
     {{-- ── HERO BANNER ──────────────────────────────────────────────────────── --}}
-    <div class="rounded-3xl p-7 mb-6 text-white relative overflow-hidden animate-fade-in-up"
-         style="background: linear-gradient(135deg, #0f0c29 0%, #1e1b4b 35%, #312e81 70%, #4338ca 100%); box-shadow: 0 8px 32px rgba(79,70,229,0.3);">
-        <div class="absolute inset-0 opacity-[0.07]"
-             style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 32px 32px;"></div>
-        <div class="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20"
-             style="background: radial-gradient(circle, #818cf8, transparent 65%); filter: blur(40px); transform: translate(20%, -30%);"></div>
+    <div class="rounded-3xl p-7 mb-6 text-white relative overflow-hidden animate-fade-up"
+         style="background:linear-gradient(135deg,#0f0c29 0%,#1e1b4b 35%,#312e81 70%,#4338ca 100%);box-shadow:0 8px 32px rgba(79,70,229,0.25);">
+        <div class="absolute inset-0 opacity-[0.06]"
+             style="background-image:radial-gradient(circle,white 1px,transparent 1px);background-size:28px 28px;"></div>
+        <div class="absolute top-0 right-0 w-72 h-72 rounded-full opacity-20"
+             style="background:radial-gradient(circle,#818cf8,transparent 65%);filter:blur(50px);transform:translate(25%,-35%);"></div>
         <div class="relative flex flex-wrap items-center justify-between gap-4">
             <div>
-                <p class="text-indigo-400 text-xs font-bold uppercase tracking-[0.15em] mb-2">Staff Workspace</p>
+                <p class="text-indigo-400 text-[11px] font-bold uppercase tracking-[0.18em] mb-2">Staff Workspace</p>
                 <h2 class="text-2xl font-extrabold text-white tracking-tight">
                     Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }}, {{ auth()->user()->name }} 👋
                 </h2>
-                <p class="text-indigo-300 text-sm mt-1.5">Here's what's happening in the support queue today.</p>
+                <p class="text-indigo-300 text-sm mt-1.5 font-medium">Here's what's happening in the support queue today.</p>
             </div>
             <a href="{{ route('admin.tickets.index') }}"
-               class="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-bold text-indigo-700 shadow-lg hover:bg-indigo-50 hover:-translate-y-0.5 transition-all duration-150">
+               class="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-white/95 px-5 py-2.5 text-sm font-bold text-indigo-700 shadow-lg hover:bg-white hover:-translate-y-0.5 transition-all duration-150">
                 View all tickets
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </a>
@@ -48,17 +48,17 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
         @foreach ($cards as $i => $card)
             <a href="{{ route('admin.tickets.index', $card['filter']) }}"
-               class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-200 group animate-fade-in-up"
-               style="animation-delay: {{ $i * 0.05 }}s;">
+               class="card group p-5 hover:-translate-y-1.5 transition-all duration-200 animate-fade-up"
+               style="animation-delay:{{ $i * 0.04 }}s;">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
-                         style="background-color: {{ $card['light'] }};">
-                        <div class="w-3.5 h-3.5 rounded-full" style="background-color: {{ $card['color'] }};"></div>
+                         style="background-color:{{ $card['light'] }};">
+                        <div class="w-3.5 h-3.5 rounded-full" style="background-color:{{ $card['color'] }};"></div>
                     </div>
                     <svg class="w-4 h-4 text-gray-200 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </div>
                 <p class="text-3xl font-extrabold text-gray-900 tabular-nums">{{ $stats[$card['key']] }}</p>
-                <p class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-wider">{{ $card['label'] }}</p>
+                <p class="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wider">{{ $card['label'] }}</p>
             </a>
         @endforeach
     </div>
@@ -67,14 +67,14 @@
     <div class="grid gap-5 lg:grid-cols-3">
 
         {{-- Donut chart --}}
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <div class="card p-6">
             <div class="flex items-center justify-between mb-5">
                 <div>
                     <h3 class="font-bold text-gray-900">Queue Breakdown</h3>
                     <p class="text-xs text-gray-400 mt-0.5">Ticket distribution by status</p>
                 </div>
                 @php $total = $stats['open'] + $stats['pending'] + $stats['resolved'] + $stats['closed']; @endphp
-                <span class="text-xs font-bold text-gray-500 bg-gray-100 rounded-full px-3 py-1">{{ $total }} total</span>
+                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 rounded-full px-3 py-1 border border-indigo-100">{{ $total }} total</span>
             </div>
 
             @if ($total > 0)
@@ -113,7 +113,7 @@
         </div>
 
         {{-- Latest tickets --}}
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm lg:col-span-2 flex flex-col">
+        <div class="card lg:col-span-2 flex flex-col">
             <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                 <div>
                     <h3 class="font-bold text-gray-900">Latest Tickets</h3>

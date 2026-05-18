@@ -50,7 +50,7 @@ function clearSelection() {
 <div class="flex gap-4 items-start">
 
     {{-- LEFT SIDEBAR --}}
-    <aside class="hidden lg:flex lg:flex-col w-52 shrink-0 bg-white rounded-2xl border border-slate-200 shadow-sm sticky top-4">
+    <aside class="hidden lg:flex lg:flex-col w-52 shrink-0 card sticky top-4">
         <div class="px-4 py-4 border-b border-slate-100">
             <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Inbox views</p>
         </div>
@@ -88,7 +88,7 @@ function clearSelection() {
     <div class="flex-1 min-w-0 space-y-3">
 
         {{-- Toolbar --}}
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <div class="card">
 
             {{-- Top: title + status tabs --}}
             <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-100">
@@ -134,9 +134,9 @@ function clearSelection() {
                             <option value="{{ $member->id }}" @selected((string)request('assigned_to') === (string)$member->id)>{{ $member->name }}</option>
                         @endforeach
                     </select>
-                    <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition">Filter</button>
+                    <button type="submit" class="btn btn-primary text-xs px-4 py-2">Filter</button>
                     @if (request()->hasAny(['q','status','category_id','assigned_to']))
-                        <a href="{{ route('admin.tickets.index') }}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Clear</a>
+                        <a href="{{ route('admin.tickets.index') }}" class="btn btn-secondary text-xs px-4 py-2">Clear</a>
                     @endif
                 </form>
             </div>
@@ -247,7 +247,7 @@ function clearSelection() {
     </div>
 
     {{-- RIGHT PREVIEW --}}
-    <aside class="hidden xl:flex xl:flex-col w-72 shrink-0 bg-white rounded-2xl border border-slate-200 shadow-sm sticky top-4 max-h-[calc(100vh-6rem)] overflow-hidden">
+    <aside class="hidden xl:flex xl:flex-col w-72 shrink-0 card sticky top-4 max-h-[calc(100vh-6rem)] overflow-hidden">
         <div class="px-5 py-4 border-b border-slate-100">
             <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Preview</p>
             <p class="font-bold text-slate-900 mt-0.5">Ticket detail</p>

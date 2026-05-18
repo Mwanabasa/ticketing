@@ -1,6 +1,7 @@
 @extends('layouts.app')
-
 @section('title', 'Welcome')
+@section('page_title', 'Home')
+@section('page_subtitle', 'Student IT Support Portal')
 
 @section('content')
 

@@ -11,27 +11,59 @@
     <style>
         *{font-family:'Inter',system-ui,sans-serif;}
         [x-cloak]{display:none!important}
-        .topbar{background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.06);box-shadow:0 1px 3px rgba(0,0,0,0.04);}
-        .card{background:#fff;border-radius:16px;border:1px solid rgba(0,0,0,0.07);box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 16px rgba(0,0,0,0.03);}
-        .card-hover:hover{box-shadow:0 4px 20px rgba(0,0,0,0.08);transform:translateY(-1px);transition:all .2s ease;}
-        .btn-primary{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s ease;box-shadow:0 2px 8px rgba(79,70,229,0.3);}
-        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,70,229,0.4);}
-        .btn-secondary{background:#fff;color:#374151;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;border:1.5px solid #e5e7eb;cursor:pointer;transition:all .15s ease;}
-        .btn-secondary:hover{background:#f9fafb;border-color:#d1d5db;}
-        .input{width:100%;border-radius:10px;border:1.5px solid #e5e7eb;padding:10px 14px;font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;}
-        .input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.12);}
-        .badge{display:inline-flex;align-items:center;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:600;}
-        .page-bg{background:linear-gradient(145deg,#f5f6ff 0%,#f0f2ff 50%,#f5f0ff 100%);}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        .animate-fade-up{animation:fadeUp .3s ease forwards;}
+
+        /* ── Page background ── */
+        .page-bg{background:#f4f5fb;}
+
+        /* ── Top bar ── */
+        .topbar{
+            background:rgba(255,255,255,0.95);
+            backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            border-bottom:1px solid rgba(99,102,241,0.08);
+            box-shadow:0 1px 0 rgba(0,0,0,0.04),0 2px 8px rgba(99,102,241,0.04);
+        }
+
+        /* ── Cards ── */
+        .card{background:#fff;border-radius:16px;border:1px solid rgba(0,0,0,0.06);box-shadow:0 1px 2px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.03);}
+        .card:hover{box-shadow:0 4px 24px rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.15);}
+
+        /* ── Buttons ── */
+        .btn{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s ease;border:none;text-decoration:none;}
+        .btn-primary{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;box-shadow:0 2px 8px rgba(79,70,229,0.3);}
+        .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(79,70,229,0.4);color:#fff;}
+        .btn-secondary{background:#fff;color:#374151;border:1.5px solid #e5e7eb;}
+        .btn-secondary:hover{background:#f9fafb;border-color:#c7d2fe;color:#4f46e5;}
+        .btn-danger{background:#fff;color:#dc2626;border:1.5px solid #fecaca;}
+        .btn-danger:hover{background:#fef2f2;border-color:#f87171;}
+
+        /* ── Inputs ── */
+        .input{width:100%;border-radius:10px;border:1.5px solid #e5e7eb;padding:9px 13px;font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;color:#111827;}
+        .input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.1);}
+        select.input{cursor:pointer;}
+
+        /* ── Page header bar ── */
+        .page-header{background:#fff;border-radius:16px;border:1px solid rgba(0,0,0,0.06);padding:20px 24px;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04);}
+
+        /* ── Empty state ── */
+        .empty-state{background:#fff;border-radius:20px;border:2px dashed #e0e7ff;padding:64px 32px;text-align:center;}
+
+        /* ── Section title ── */
+        .section-title{font-size:15px;font-weight:700;color:#111827;}
+        .section-sub{font-size:12px;color:#9ca3af;margin-top:2px;}
+
+        /* ── Animations ── */
+        @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+        .animate-fade-up{animation:fadeUp .25s ease forwards;}
+
+        /* ── Scrollbar ── */
         ::-webkit-scrollbar{width:5px;height:5px}
         ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:99px}
-        ::-webkit-scrollbar-thumb:hover{background:#9ca3af}
+        ::-webkit-scrollbar-thumb{background:#ddd6fe;border-radius:99px}
+        ::-webkit-scrollbar-thumb:hover{background:#a5b4fc}
     </style>
     @stack('head')
 </head>
-<body class="h-full antialiased page-bg">
+<body class="h-full antialiased" style="background:#f4f5fb;">
 @auth
 @php
     $user = auth()->user();
