@@ -5,22 +5,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TicketReply extends Model
+class Notification extends Model
 {
     protected $fillable = [
-        'ticket_id',
         'user_id',
+        'type',
+        'title',
         'body',
-        'attachment_path',
+        'url',
+        'read_at',
     ];
 
-    public function ticket(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(Ticket::class);
+        return [
+            'read_at' => 'datetime',
+        ];
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function isUnread(): bool
+    {
+        return $this->read_at === null;
     }
 }

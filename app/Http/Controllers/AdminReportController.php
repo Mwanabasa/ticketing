@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Enums\TicketStatus;
+use App\Enums\UserRole;
 use App\Models\Ticket;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,11 +17,11 @@ class AdminReportController extends Controller
     {
         $request->validate([
             'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
+            'to'   => ['nullable', 'date'],
         ]);
 
         $from = $request->date('from');
-        $to = $request->date('to');
+        $to   = $request->date('to');
 
         if ($from && $to && $to->lt($from)) {
             return redirect()
@@ -29,7 +31,7 @@ class AdminReportController extends Controller
 
         $base = Ticket::query()
             ->when($from, fn ($q) => $q->whereDate('created_at', '>=', $from))
-            ->when($to, fn ($q) => $q->whereDate('created_at', '<=', $to));
+            ->when($to,   fn ($q) => $q->whereDate('created_at', '<=', $to));
 
         $byStatus = (clone $base)
             ->select('status', DB::raw('count(*) as total'))
@@ -49,18 +51,35 @@ class AdminReportController extends Controller
             ->with(['user', 'category'])
             ->where('status', TicketStatus::Resolved)
             ->when($from, fn ($q) => $q->whereDate('updated_at', '>=', $from))
-            ->when($to, fn ($q) => $q->whereDate('updated_at', '<=', $to))
+            ->when($to,   fn ($q) => $q->whereDate('updated_at', '<=', $to))
             ->latest('updated_at')
             ->limit(20)
             ->get();
 
+        $staffPerformance = User::query()
+            ->where('role', UserRole::Staff)
+            ->withCount([
+                'assignedTickets as total_assigned',
+                'assignedTickets as resolved_count' => fn ($q) => $q->where('status', TicketStatus::Resolved),
+                'assignedTickets as closed_count'   => fn ($q) => $q->where('status', TicketStatus::Closed),
+            ])
+            ->addSelect([
+                'avg_rating' => Ticket::query()
+                    ->selectRaw('AVG(rating)')
+                    ->whereColumn('assigned_to', 'users.id')
+                    ->whereNotNull('rating'),
+            ])
+            ->orderByDesc('resolved_count')
+            ->get();
+
         return view('admin.reports.index', [
-            'byStatus' => $byStatus,
-            'byCategory' => $byCategory,
-            'totalTickets' => $totalTickets,
-            'recentResolved' => $recentResolved,
-            'from' => $from,
-            'to' => $to,
+            'byStatus'         => $byStatus,
+            'byCategory'       => $byCategory,
+            'totalTickets'     => $totalTickets,
+            'recentResolved'   => $recentResolved,
+            'staffPerformance' => $staffPerformance,
+            'from'             => $from,
+            'to'               => $to,
         ]);
     }
 }

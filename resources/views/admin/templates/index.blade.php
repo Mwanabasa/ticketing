@@ -1,65 +1,79 @@
 @extends('layouts.app')
-
-@section('title', 'Ticket templates')
-@section('page_title', 'Ticket templates')
+@section('title', 'Ticket Templates')
+@section('page_title', 'Ticket Templates')
+@section('page_subtitle', 'Reusable templates that pre-fill the student ticket form')
 
 @section('content')
-    <div class="mb-5 flex items-center justify-between">
-        <p class="text-sm text-slate-500">Reusable templates that pre-fill the student ticket form.</p>
-        <a href="{{ route('admin.templates.create') }}" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition">
-            + New template
+
+    {{-- Header --}}
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <div>
+                <p class="font-bold text-gray-900">All Templates</p>
+                <p class="text-xs text-gray-400">{{ $templates->total() }} template{{ $templates->total() !== 1 ? 's' : '' }}</p>
+            </div>
+        </div>
+        <a href="{{ route('admin.templates.create') }}"
+           class="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5"
+           style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            New Template
         </a>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table class="w-full text-sm">
-            <thead class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <tr>
-                    <th class="px-5 py-3 text-left">Name</th>
-                    <th class="px-5 py-3 text-left">Category</th>
-                    <th class="px-5 py-3 text-left">Subject</th>
-                    <th class="px-5 py-3 text-left">Status</th>
-                    <th class="px-5 py-3 text-left">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($templates as $template)
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="px-5 py-4 font-semibold text-slate-900">{{ $template->name }}</td>
-                        <td class="px-5 py-4 text-slate-500">{{ $template->category?->name ?? '—' }}</td>
-                        <td class="px-5 py-4 text-slate-500">{{ Str::limit($template->subject, 50) }}</td>
-                        <td class="px-5 py-4">
+    @if ($templates->isEmpty())
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm py-20 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-50 mb-4">
+                <svg class="w-8 h-8 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <p class="font-bold text-gray-700 text-lg">No templates yet</p>
+            <p class="mt-1 text-sm text-gray-400">Create templates to help students fill tickets faster.</p>
+            <a href="{{ route('admin.templates.create') }}" class="mt-5 inline-flex rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-md" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">Create first template</a>
+        </div>
+    @else
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            @foreach ($templates as $template)
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
+                    <div class="p-5">
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {{ $template->is_active ? 'bg-indigo-50' : 'bg-gray-100' }}">
+                                <svg class="w-5 h-5 {{ $template->is_active ? 'text-indigo-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
                             @if ($template->is_active)
-                                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+                                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
                                 </span>
                             @else
-                                <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Inactive
+                                <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Inactive
                                 </span>
                             @endif
-                        </td>
-                        <td class="px-5 py-4">
-                            <div class="flex items-center gap-3">
-                                <a href="{{ route('admin.templates.edit', $template) }}" class="text-sm font-medium text-indigo-600 hover:underline">Edit</a>
-                                <form method="POST" action="{{ route('admin.templates.destroy', $template) }}" onsubmit="return confirm('Delete this template?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-sm font-medium text-red-500 hover:underline">Delete</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-5 py-14 text-center">
-                            <p class="font-semibold text-slate-700">No templates yet</p>
-                            <p class="mt-1 text-sm text-slate-400">Create templates to help students fill tickets faster.</p>
-                            <a href="{{ route('admin.templates.create') }}" class="mt-4 inline-flex rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">New template</a>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-        <div class="border-t border-slate-200 p-4">{{ $templates->links() }}</div>
-    </div>
+                        </div>
+                        <h3 class="font-bold text-gray-900 mb-1">{{ $template->name }}</h3>
+                        <p class="text-xs text-gray-500 mb-1">{{ Str::limit($template->subject, 60) }}</p>
+                        @if ($template->category)
+                            <span class="inline-flex rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-600">{{ $template->category->name }}</span>
+                        @endif
+                        <p class="text-xs text-gray-400 mt-3 line-clamp-2">{{ Str::limit($template->description, 100) }}</p>
+                    </div>
+                    <div class="border-t border-gray-100 px-5 py-3 flex items-center justify-between">
+                        <a href="{{ route('admin.templates.edit', $template) }}"
+                           class="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            Edit
+                        </a>
+                        <form method="POST" action="{{ route('admin.templates.destroy', $template) }}" onsubmit="return confirm('Delete this template?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="text-sm font-semibold text-red-400 hover:text-red-600 transition">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        <div class="mt-4">{{ $templates->links() }}</div>
+    @endif
+
 @endsection

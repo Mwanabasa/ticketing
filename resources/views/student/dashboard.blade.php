@@ -1,124 +1,170 @@
 @extends('layouts.app')
 
-@section('title', 'My dashboard')
-@section('page_title', 'Dashboard')
+@section('title', 'My Dashboard')
+@section('page_title', 'My Dashboard')
+@section('page_subtitle', 'Good ' . (now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening')) . ', ' . auth()->user()->name . ' 👋')
 
 @section('content')
 
-    {{-- Welcome banner --}}
-    <div class="rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-500 p-6 shadow-lg mb-6">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+    {{-- ── HERO BANNER ──────────────────────────────────────────────────────── --}}
+    <div class="rounded-3xl p-7 mb-6 text-white relative overflow-hidden animate-fade-in-up"
+         style="background: linear-gradient(135deg, #0c1a2e 0%, #0f2744 35%, #1e3a5f 65%, #0ea5e9 100%); box-shadow: 0 8px 32px rgba(14,165,233,0.25);">
+        <div class="absolute inset-0 opacity-[0.07]"
+             style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 32px 32px;"></div>
+        <div class="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20"
+             style="background: radial-gradient(circle, #38bdf8, transparent 65%); filter: blur(40px); transform: translate(20%, -30%);"></div>
+        <div class="relative flex flex-wrap items-center justify-between gap-4">
             <div>
-                <p class="text-sm font-semibold text-indigo-200 uppercase tracking-widest">Student workspace</p>
-                <h1 class="mt-1 text-2xl font-bold text-white">
+                <p class="text-sky-400 text-xs font-bold uppercase tracking-[0.15em] mb-2">Student Workspace</p>
+                <h2 class="text-2xl font-extrabold text-white tracking-tight">
                     Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }}, {{ auth()->user()->name }} 👋
-                </h1>
-                <p class="mt-1 text-sm text-indigo-200">Track your support requests and stay updated on their progress.</p>
+                </h2>
+                <p class="text-sky-200 text-sm mt-1.5">Track your support requests and stay updated on their progress.</p>
             </div>
             <a href="{{ route('student.tickets.create') }}"
-               class="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-indigo-700 shadow hover:bg-indigo-50 transition shrink-0">
-                + New ticket
+               class="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-bold text-sky-700 shadow-lg hover:bg-sky-50 hover:-translate-y-0.5 transition-all duration-150">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                New Ticket
             </a>
         </div>
     </div>
 
-    {{-- Stat cards --}}
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-6">
-        @foreach ([
-            ['label' => 'Active',   'val' => $activeCount,       'color' => 'indigo', 'desc' => 'Open & pending'],
-            ['label' => 'Open',     'val' => $stats['open'],     'color' => 'emerald','desc' => 'Awaiting staff'],
-            ['label' => 'Pending',  'val' => $stats['pending'],  'color' => 'amber',  'desc' => 'Staff responded'],
-            ['label' => 'Resolved', 'val' => $stats['resolved'], 'color' => 'blue',   'desc' => 'Marked solved'],
-            ['label' => 'Total',    'val' => $stats['total'],    'color' => 'slate',  'desc' => 'All time'],
-        ] as $card)
-            @php
-                $colors = [
-                    'indigo'  => ['border' => 'border-indigo-200',  'bg' => 'bg-indigo-50',  'dt' => 'text-indigo-700',  'dd' => 'text-indigo-800',  'desc' => 'text-indigo-500'],
-                    'emerald' => ['border' => 'border-emerald-200', 'bg' => 'bg-emerald-50', 'dt' => 'text-emerald-700', 'dd' => 'text-emerald-800', 'desc' => 'text-emerald-500'],
-                    'amber'   => ['border' => 'border-amber-200',   'bg' => 'bg-amber-50',   'dt' => 'text-amber-700',   'dd' => 'text-amber-800',   'desc' => 'text-amber-500'],
-                    'blue'    => ['border' => 'border-blue-200',    'bg' => 'bg-blue-50',    'dt' => 'text-blue-700',    'dd' => 'text-blue-800',    'desc' => 'text-blue-500'],
-                    'slate'   => ['border' => 'border-slate-200',   'bg' => 'bg-white',      'dt' => 'text-slate-500',   'dd' => 'text-slate-700',   'desc' => 'text-slate-400'],
-                ][$card['color']];
-            @endphp
-            <div class="rounded-2xl border {{ $colors['border'] }} {{ $colors['bg'] }} p-5 shadow-sm">
-                <dt class="text-xs font-semibold uppercase tracking-wide {{ $colors['dt'] }}">{{ $card['label'] }}</dt>
-                <dd class="mt-2 text-4xl font-extrabold {{ $colors['dd'] }}">{{ $card['val'] }}</dd>
-                <p class="mt-1 text-xs {{ $colors['desc'] }}">{{ $card['desc'] }}</p>
+    {{-- ── STAT CARDS ───────────────────────────────────────────────────────── --}}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+        @php
+        $cards = [
+            ['label' => 'Active',   'val' => $activeCount,       'color' => '#6366f1', 'light' => '#e0e7ff', 'desc' => 'Open & pending'],
+            ['label' => 'Open',     'val' => $stats['open'],     'color' => '#10b981', 'light' => '#d1fae5', 'desc' => 'Awaiting staff'],
+            ['label' => 'Pending',  'val' => $stats['pending'],  'color' => '#f59e0b', 'light' => '#fef3c7', 'desc' => 'Staff responded'],
+            ['label' => 'Resolved', 'val' => $stats['resolved'], 'color' => '#3b82f6', 'light' => '#dbeafe', 'desc' => 'Marked solved'],
+            ['label' => 'Total',    'val' => $stats['total'],    'color' => '#94a3b8', 'light' => '#f1f5f9', 'desc' => 'All time'],
+        ];
+        @endphp
+
+        @foreach ($cards as $card)
+            <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                     style="background-color: {{ $card['light'] }};">
+                    <div class="w-4 h-4 rounded-full" style="background-color: {{ $card['color'] }};"></div>
+                </div>
+                <p class="text-3xl font-extrabold text-gray-900 tabular-nums">{{ $card['val'] }}</p>
+                <p class="text-xs font-semibold text-gray-500 mt-1 uppercase tracking-wide">{{ $card['label'] }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">{{ $card['desc'] }}</p>
             </div>
         @endforeach
     </div>
 
-    {{-- Recent tickets --}}
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+    {{-- ── QUICK ACTIONS ────────────────────────────────────────────────────── --}}
+    <div class="grid sm:grid-cols-3 gap-4 mb-6">
+        <a href="{{ route('student.tickets.create') }}"
+           class="group flex items-center gap-4 rounded-2xl p-5 text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+           style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </div>
             <div>
-                <p class="font-semibold text-slate-900">Recent tickets</p>
-                <p class="text-xs text-slate-400 mt-0.5">Your latest requests and their current progress.</p>
+                <p class="font-bold text-white">New Ticket</p>
+                <p class="text-indigo-200 text-xs mt-0.5">Submit a support request</p>
+            </div>
+            <svg class="w-5 h-5 text-white/50 ml-auto group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+
+        <a href="{{ route('student.tickets.index') }}"
+           class="group flex items-center gap-4 rounded-2xl bg-white border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            </div>
+            <div>
+                <p class="font-bold text-gray-900">My Tickets</p>
+                <p class="text-gray-400 text-xs mt-0.5">View all your requests</p>
+            </div>
+            <svg class="w-5 h-5 text-gray-300 ml-auto group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+
+        <a href="{{ route('knowledge-base.index') }}"
+           class="group flex items-center gap-4 rounded-2xl bg-white border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            </div>
+            <div>
+                <p class="font-bold text-gray-900">Knowledge Base</p>
+                <p class="text-gray-400 text-xs mt-0.5">Browse help articles</p>
+            </div>
+            <svg class="w-5 h-5 text-gray-300 ml-auto group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+    </div>
+
+    {{-- ── RECENT TICKETS ───────────────────────────────────────────────────── --}}
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+            <div>
+                <h3 class="font-bold text-gray-900">Recent Tickets</h3>
+                <p class="text-xs text-gray-400 mt-0.5">Your latest support requests</p>
             </div>
             <a href="{{ route('student.tickets.index') }}"
-               class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
-                View all
-            </a>
+               class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition">View all →</a>
         </div>
 
         @if ($recentTickets->isEmpty())
-            <div class="py-16 text-center px-4">
-                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 mb-4">
-                    <svg class="w-7 h-7 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="py-20 text-center px-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-50 mb-4">
+                    <svg class="w-8 h-8 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
                     </svg>
                 </div>
-                <p class="font-semibold text-slate-700">No tickets yet</p>
-                <p class="mt-1 text-sm text-slate-400">Submit a ticket whenever you need IT support.</p>
+                <p class="font-bold text-gray-700 text-lg">No tickets yet</p>
+                <p class="mt-1 text-sm text-gray-400">Submit a ticket whenever you need IT support.</p>
                 <a href="{{ route('student.tickets.create') }}"
-                   class="mt-5 inline-flex rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition">
+                   class="mt-5 inline-flex rounded-xl px-6 py-3 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5"
+                   style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
                     Create your first ticket
                 </a>
             </div>
         @else
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        <tr>
-                            <th class="px-5 py-3 text-left">Ticket</th>
-                            <th class="px-5 py-3 text-left">Category</th>
-                            <th class="px-5 py-3 text-left">Assigned to</th>
-                            <th class="px-5 py-3 text-left">Status</th>
-                            <th class="px-5 py-3 text-left">Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @foreach ($recentTickets as $ticket)
-                            <tr class="hover:bg-slate-50 transition">
-                                <td class="px-5 py-3.5">
-                                    <a href="{{ route('student.tickets.show', $ticket) }}"
-                                       class="font-semibold text-slate-900 hover:text-indigo-600 hover:underline">
-                                        #{{ $ticket->id }} — {{ Str::limit($ticket->subject, 44) }}
-                                    </a>
-                                </td>
-                                <td class="px-5 py-3.5 text-slate-500">{{ $ticket->category->name }}</td>
-                                <td class="px-5 py-3.5 text-slate-500">
-                                    @if ($ticket->assignee)
-                                        <span class="flex items-center gap-1.5">
-                                            <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center">
-                                                {{ strtoupper(substr($ticket->assignee->name, 0, 1)) }}
-                                            </span>
-                                            {{ $ticket->assignee->name }}
-                                        </span>
-                                    @else
-                                        <span class="text-slate-400">Not assigned</span>
-                                    @endif
-                                </td>
-                                <td class="px-5 py-3.5">
-                                    <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $ticket->status->badgeClass() }}">
-                                        {{ $ticket->status->label() }}
-                                    </span>
-                                </td>
-                                <td class="px-5 py-3.5 text-xs text-slate-400">{{ $ticket->updated_at->diffForHumans() }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div class="divide-y divide-gray-50">
+                @foreach ($recentTickets as $ticket)
+                    <a href="{{ route('student.tickets.show', $ticket) }}"
+                       class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition group">
+                        @php
+                            $dot = match($ticket->status->value) {
+                                'open'     => '#10b981',
+                                'pending'  => '#f59e0b',
+                                'resolved' => '#3b82f6',
+                                default    => '#94a3b8',
+                            };
+                        @endphp
+                        <div class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ $dot }};"></div>
+
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition">
+                                {{ Str::limit($ticket->subject, 55) }}
+                            </p>
+                            <p class="text-xs text-gray-400 mt-0.5">
+                                #{{ $ticket->id }} · {{ $ticket->category->name }}
+                                @if ($ticket->assignee)
+                                    · <span class="text-indigo-500 font-medium">{{ $ticket->assignee->name }}</span>
+                                @else
+                                    · <span class="text-gray-400">Not assigned</span>
+                                @endif
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="hidden sm:inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $ticket->priority->badgeClass() }}">{{ $ticket->priority->label() }}</span>
+                            <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $ticket->status->badgeClass() }}">{{ $ticket->status->label() }}</span>
+                            <span class="hidden md:block text-xs text-gray-400">{{ $ticket->updated_at->diffForHumans() }}</span>
+                        </div>
+
+                        <svg class="w-4 h-4 text-gray-300 shrink-0 group-hover:text-indigo-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                @endforeach
+            </div>
+            <div class="border-t border-gray-100 px-6 py-4">
+                <a href="{{ route('student.tickets.index') }}"
+                   class="flex items-center justify-center gap-2 text-sm font-semibold text-gray-500 hover:text-indigo-600 transition">
+                    View all tickets
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
             </div>
         @endif
     </div>

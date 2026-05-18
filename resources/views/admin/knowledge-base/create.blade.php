@@ -1,59 +1,82 @@
 @extends('layouts.app')
-
-@section('title', 'New article')
-@section('page_title', 'New article')
+@section('title', 'New Article')
+@section('page_title', 'New Article')
+@section('page_subtitle', 'Write a new knowledge base article')
 
 @section('content')
-    <div class="max-w-2xl">
-        <p class="mb-6 text-sm text-slate-500">
-            <a href="{{ route('admin.knowledge-base.index') }}" class="font-medium text-indigo-600 hover:underline">← Knowledge Base</a>
-        </p>
+<div class="max-w-3xl">
+    <a href="{{ route('admin.knowledge-base.index') }}"
+       class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-indigo-600 transition mb-6">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to Knowledge Base
+    </a>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <form method="POST" action="{{ route('admin.knowledge-base.store') }}" class="space-y-5">
-                @csrf
-                <div>
-                    <label for="title" class="block text-sm font-medium text-slate-700 mb-1.5">Title</label>
-                    <input id="title" name="title" type="text" value="{{ old('title') }}" required
-                        placeholder="e.g. How to connect to campus WiFi"
-                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 @error('title') border-red-400 @enderror">
-                    @error('title') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100" style="background: linear-gradient(135deg, #f0f9ff, #eef2ff);">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white" style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 </div>
                 <div>
-                    <label for="category_id" class="block text-sm font-medium text-slate-700 mb-1.5">Category <span class="text-slate-400">(optional)</span></label>
+                    <h2 class="font-bold text-gray-900">New Article</h2>
+                    <p class="text-xs text-gray-400">Fill in the details and publish when ready</p>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ route('admin.knowledge-base.store') }}" class="p-6 space-y-5">
+            @csrf
+
+            <div class="grid sm:grid-cols-2 gap-5">
+                <div class="sm:col-span-2">
+                    <label for="title" class="block text-sm font-semibold text-gray-700 mb-2">Article title</label>
+                    <input id="title" name="title" type="text" value="{{ old('title') }}" required
+                           placeholder="e.g. How to connect to campus WiFi"
+                           class="w-full rounded-xl border-2 px-4 py-2.5 text-sm outline-none transition {{ $errors->has('title') ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-indigo-500' }}">
+                    @error('title') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="category_id" class="block text-sm font-semibold text-gray-700 mb-2">Category <span class="text-gray-400 font-normal">(optional)</span></label>
                     <select id="category_id" name="category_id"
-                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                            class="w-full rounded-xl border-2 border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-500 transition">
                         <option value="">No category</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>{{ $category->name }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div>
-                    <label for="content" class="block text-sm font-medium text-slate-700 mb-1.5">Content</label>
-                    <textarea id="content" name="content" rows="12" required
-                        placeholder="Write the article content here. You can use plain text or step-by-step instructions."
-                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 @error('content') border-red-400 @enderror">{{ old('content') }}</textarea>
-                    @error('content') <p class="mt-1.5 text-xs text-red-600">{{ $message }}</p> @enderror
-                </div>
-                <div class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+
+                <div class="flex items-center gap-3 rounded-xl border-2 border-gray-100 bg-gray-50 px-4 py-3.5">
                     <input id="is_published" name="is_published" type="checkbox" value="1" @checked(old('is_published'))
-                        class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                           class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                     <div>
-                        <label for="is_published" class="text-sm font-medium text-slate-700">Publish immediately</label>
-                        <p class="text-xs text-slate-400">Students can see published articles on the Knowledge Base page.</p>
+                        <label for="is_published" class="text-sm font-semibold text-gray-700 cursor-pointer">Publish immediately</label>
+                        <p class="text-xs text-gray-400">Students can see published articles.</p>
                     </div>
                 </div>
-                <div class="flex gap-3 pt-2">
-                    <button type="submit" class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition">
-                        Save article
-                    </button>
-                    <a href="{{ route('admin.knowledge-base.index') }}"
-                       class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
-                        Cancel
-                    </a>
-                </div>
-            </form>
-        </div>
+            </div>
+
+            <div>
+                <label for="content" class="block text-sm font-semibold text-gray-700 mb-2">Content</label>
+                <textarea id="content" name="content" rows="14" required
+                          placeholder="Write the article content here. Use clear step-by-step instructions…"
+                          class="w-full rounded-xl border-2 px-4 py-3 text-sm outline-none transition resize-none font-mono {{ $errors->has('content') ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-indigo-500' }}">{{ old('content') }}</textarea>
+                @error('content') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="flex gap-3 pt-2 border-t border-gray-100">
+                <button type="submit"
+                        class="rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5"
+                        style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
+                    Save Article
+                </button>
+                <a href="{{ route('admin.knowledge-base.index') }}"
+                   class="rounded-xl border-2 border-gray-200 px-6 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
     </div>
+</div>
 @endsection

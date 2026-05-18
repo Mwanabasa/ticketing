@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\TicketTemplate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class AdminTicketTemplateController extends Controller
 
     public function create(): View
     {
-        $categories = \App\Models\Category::query()->orderBy('name')->get();
+        $categories = Category::query()->orderBy('name')->get();
         return view('admin.templates.create', compact('categories'));
     }
 
@@ -42,7 +43,7 @@ class AdminTicketTemplateController extends Controller
 
     public function edit(TicketTemplate $template): View
     {
-        $categories = \App\Models\Category::query()->orderBy('name')->get();
+        $categories = Category::query()->orderBy('name')->get();
         return view('admin.templates.edit', compact('template', 'categories'));
     }
 

@@ -1,71 +1,114 @@
 @extends('layouts.app')
-
-@section('title', 'User Management')
+@section('title', 'Users')
 @section('page_title', 'User Management')
+@section('page_subtitle', 'Manage staff and student accounts')
 
 @section('content')
-    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-wrap gap-2">
-            <input type="text" name="q" value="{{ request('q') }}" placeholder="Search name or email…"
-                   class="rounded-xl border border-slate-300 px-4 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 w-56">
-            <select name="role" class="rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                <option value="">All roles</option>
-                @foreach (\App\Enums\UserRole::cases() as $role)
-                    <option value="{{ $role->value }}" @selected(request('role') === $role->value)>{{ $role->label() }}</option>
-                @endforeach
-            </select>
-            <button type="submit" class="rounded-xl bg-slate-700 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition">Filter</button>
-            @if (request()->hasAny(['q', 'role']))
-                <a href="{{ route('admin.users.index') }}" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition">Clear</a>
-            @endif
-        </form>
-        <a href="{{ route('admin.users.create') }}" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition">
-            + New user
-        </a>
+
+    {{-- Stats row --}}
+    @php
+        $totalStaff    = $users->getCollection()->where('role.value', 'staff')->count();
+        $totalStudents = $users->getCollection()->where('role.value', 'student')->count();
+    @endphp
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mb-3">
+                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <p class="text-2xl font-extrabold text-gray-900">{{ $users->total() }}</p>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-1">Total Users</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+            <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center mb-3">
+                <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <p class="text-2xl font-extrabold text-gray-900">{{ $totalStaff }}</p>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-1">Staff Members</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+            <div class="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center mb-3">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            </div>
+            <p class="text-2xl font-extrabold text-gray-900">{{ $totalStudents }}</p>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-1">Students</p>
+        </div>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    {{-- Toolbar --}}
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-gray-100">
+            <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-wrap gap-2">
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="Search name or email…"
+                           class="pl-9 pr-4 py-2 rounded-xl border-2 border-gray-200 text-sm outline-none focus:border-indigo-500 transition w-56">
+                </div>
+                <select name="role" class="rounded-xl border-2 border-gray-200 px-3 py-2 text-sm outline-none focus:border-indigo-500 transition">
+                    <option value="">All roles</option>
+                    @foreach (\App\Enums\UserRole::cases() as $role)
+                        <option value="{{ $role->value }}" @selected(request('role') === $role->value)>{{ $role->label() }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="rounded-xl bg-gray-800 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-900 transition">Filter</button>
+                @if (request()->hasAny(['q', 'role']))
+                    <a href="{{ route('admin.users.index') }}" class="rounded-xl border-2 border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">Clear</a>
+                @endif
+            </form>
+            <a href="{{ route('admin.users.create') }}"
+               class="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5"
+               style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                New User
+            </a>
+        </div>
+
         <table class="w-full text-sm">
-            <thead class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <thead class="bg-gray-50 border-b border-gray-100">
                 <tr>
-                    <th class="px-5 py-3 text-left">Name</th>
-                    <th class="px-5 py-3 text-left">Email</th>
-                    <th class="px-5 py-3 text-left">Role</th>
-                    <th class="px-5 py-3 text-left">Joined</th>
-                    <th class="px-5 py-3 text-left">Actions</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-widest text-gray-400">User</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-widest text-gray-400">Email</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-widest text-gray-400">Role</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-widest text-gray-400">Joined</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-widest text-gray-400">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y divide-gray-50">
                 @forelse ($users as $user)
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="px-5 py-3.5">
-                            <div class="flex items-center gap-2.5">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0
-                                    {{ $user->isStaff() ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-200 text-slate-700' }}">
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                                     style="background: linear-gradient(135deg, {{ $user->isStaff() ? '#4f46e5, #7c3aed' : '#0ea5e9, #6366f1' }});">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </div>
-                                <span class="font-medium text-slate-900">{{ $user->name }}</span>
-                                @if ($user->id === auth()->id())
-                                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">You</span>
-                                @endif
+                                <div>
+                                    <p class="font-semibold text-gray-900">{{ $user->name }}</p>
+                                    @if ($user->id === auth()->id())
+                                        <span class="inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">You</span>
+                                    @endif
+                                </div>
                             </div>
                         </td>
-                        <td class="px-5 py-3.5 text-slate-500">{{ $user->email }}</td>
-                        <td class="px-5 py-3.5">
-                            <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold
-                                {{ $user->isStaff() ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600' }}">
+                        <td class="px-5 py-4 text-gray-500 text-sm">{{ $user->email }}</td>
+                        <td class="px-5 py-4">
+                            <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold
+                                {{ $user->isStaff() ? 'bg-indigo-100 text-indigo-700' : 'bg-sky-100 text-sky-700' }}">
                                 {{ $user->role->label() }}
                             </span>
                         </td>
-                        <td class="px-5 py-3.5 text-slate-400 text-xs">{{ $user->created_at->format('M j, Y') }}</td>
-                        <td class="px-5 py-3.5">
+                        <td class="px-5 py-4 text-gray-400 text-xs">{{ $user->created_at->format('M j, Y') }}</td>
+                        <td class="px-5 py-4">
                             <div class="flex items-center gap-3">
-                                <a href="{{ route('admin.users.edit', $user) }}" class="text-sm font-medium text-indigo-600 hover:underline">Edit</a>
+                                <a href="{{ route('admin.users.edit', $user) }}"
+                                   class="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Edit
+                                </a>
                                 @if ($user->id !== auth()->id())
                                     <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
-                                          onsubmit="return confirm('Delete {{ addslashes($user->name) }}? This cannot be undone.')">
+                                          onsubmit="return confirm('Delete {{ addslashes($user->name) }}?')">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="text-sm font-medium text-red-500 hover:underline">Delete</button>
+                                        <button type="submit" class="text-sm font-semibold text-red-400 hover:text-red-600 transition">Delete</button>
                                     </form>
                                 @endif
                             </div>
@@ -73,14 +116,15 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-5 py-14 text-center">
-                            <p class="font-semibold text-slate-700">No users found</p>
-                            <p class="mt-1 text-sm text-slate-400">Try adjusting your filters or create a new user.</p>
+                        <td colspan="5" class="px-5 py-16 text-center">
+                            <p class="font-semibold text-gray-600">No users found</p>
+                            <p class="mt-1 text-sm text-gray-400">Try adjusting your filters.</p>
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
-        <div class="border-t border-slate-200 p-4">{{ $users->links() }}</div>
+        <div class="border-t border-gray-100 px-5 py-4">{{ $users->links() }}</div>
     </div>
+
 @endsection

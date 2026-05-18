@@ -14,7 +14,8 @@ class ReplyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'body' => ['required', 'string', 'max:10000'],
+            'body'       => ['required', 'string', 'max:10000'],
+            'attachment' => ['nullable', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
         ];
     }
 }

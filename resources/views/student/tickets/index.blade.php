@@ -10,7 +10,7 @@
             <input type="text" name="q" value="{{ request('q') }}" placeholder="Search tickets…"
                 class="flex-1 min-w-[180px] rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
             <select name="status" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                <option value="">All statuses</option>
+                <option value="">Active tickets</option>
                 @foreach (\App\Enums\TicketStatus::cases() as $s)
                     <option value="{{ $s->value }}" @selected(request('status') == $s->value)>{{ $s->label() }}</option>
                 @endforeach
@@ -22,11 +22,20 @@
                 @endforeach
             </select>
             <button type="submit" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition">Filter</button>
-            @if (request('q') || request('status') || request('category_id'))
+            @if (request()->hasAny(['q', 'status', 'category_id']))
                 <a href="{{ route('student.tickets.index') }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Clear</a>
             @endif
             <a href="{{ route('student.tickets.create') }}" class="ml-auto rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition">+ New ticket</a>
         </form>
+
+        {{-- Show closed toggle --}}
+        @unless (request()->filled('status'))
+            <p class="mt-2 text-xs text-slate-400">
+                Showing active tickets only.
+                <a href="{{ route('student.tickets.index', array_merge(request()->except('page'), ['status' => 'closed'])) }}"
+                   class="text-indigo-500 hover:underline">Show closed tickets</a>
+            </p>
+        @endunless
     </div>
 
     @if ($tickets->isEmpty())
@@ -49,6 +58,7 @@
                         <th class="px-5 py-3 text-left">Category</th>
                         <th class="px-5 py-3 text-left">Priority</th>
                         <th class="px-5 py-3 text-left">Status</th>
+                        <th class="px-5 py-3 text-left">Due</th>
                         <th class="px-5 py-3 text-left">Updated</th>
                     </tr>
                 </thead>
@@ -66,6 +76,16 @@
                             </td>
                             <td class="px-5 py-3.5">
                                 <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $ticket->status->badgeClass() }}">{{ $ticket->status->label() }}</span>
+                            </td>
+                            <td class="px-5 py-3.5 text-xs">
+                                @if ($ticket->due_at && ! in_array($ticket->status, [\App\Enums\TicketStatus::Resolved, \App\Enums\TicketStatus::Closed]))
+                                    <span class="{{ $ticket->isOverdue() ? 'text-red-600 font-semibold' : 'text-slate-400' }}">
+                                        {{ $ticket->due_at->format('M j') }}
+                                        @if ($ticket->isOverdue()) ⚠ @endif
+                                    </span>
+                                @else
+                                    <span class="text-slate-300">—</span>
+                                @endif
                             </td>
                             <td class="px-5 py-3.5 text-xs text-slate-400">{{ $ticket->updated_at->diffForHumans() }}</td>
                         </tr>

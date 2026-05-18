@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\KnowledgeBaseArticle;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class KnowledgeBaseController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $query = KnowledgeBaseArticle::query()
             ->where('is_published', true)
@@ -26,9 +28,15 @@ class KnowledgeBaseController extends Controller
             });
         }
 
-        $articles = $query->latest()->paginate(12)->withQueryString();
+        // JSON response for live KB search on ticket create form
+        if ($request->input('_format') === 'json') {
+            return response()->json(
+                $query->limit(4)->get(['id', 'title', 'slug'])
+            );
+        }
 
-        $categories = \App\Models\Category::query()->orderBy('name')->get();
+        $articles   = $query->latest()->paginate(12)->withQueryString();
+        $categories = Category::query()->orderBy('name')->get();
 
         return view('knowledge-base.index', compact('articles', 'categories'));
     }

@@ -1,7 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Staff dashboard')
+@section('title', 'Staff Dashboard')
 @section('page_title', 'Dashboard')
+@section('page_subtitle', 'Good ' . (now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening')) . ', ' . auth()->user()->name . ' 👋')
 
 @push('head')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -9,120 +10,159 @@
 
 @section('content')
 
-    {{-- Welcome banner --}}
-    <div class="rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 p-6 shadow-lg mb-6">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+    {{-- ── HERO BANNER ──────────────────────────────────────────────────────── --}}
+    <div class="rounded-3xl p-7 mb-6 text-white relative overflow-hidden animate-fade-in-up"
+         style="background: linear-gradient(135deg, #0f0c29 0%, #1e1b4b 35%, #312e81 70%, #4338ca 100%); box-shadow: 0 8px 32px rgba(79,70,229,0.3);">
+        <div class="absolute inset-0 opacity-[0.07]"
+             style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 32px 32px;"></div>
+        <div class="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20"
+             style="background: radial-gradient(circle, #818cf8, transparent 65%); filter: blur(40px); transform: translate(20%, -30%);"></div>
+        <div class="relative flex flex-wrap items-center justify-between gap-4">
             <div>
-                <p class="text-sm font-semibold text-indigo-200 uppercase tracking-widest">Staff workspace</p>
-                <h1 class="mt-1 text-2xl font-bold text-white">
+                <p class="text-indigo-400 text-xs font-bold uppercase tracking-[0.15em] mb-2">Staff Workspace</p>
+                <h2 class="text-2xl font-extrabold text-white tracking-tight">
                     Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 17 ? 'afternoon' : 'evening') }}, {{ auth()->user()->name }} 👋
-                </h1>
-                <p class="mt-1 text-sm text-indigo-200">Here's what's happening in the support queue today.</p>
+                </h2>
+                <p class="text-indigo-300 text-sm mt-1.5">Here's what's happening in the support queue today.</p>
             </div>
             <a href="{{ route('admin.tickets.index') }}"
-               class="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-indigo-700 shadow hover:bg-indigo-50 transition shrink-0">
-                Manage tickets →
+               class="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-bold text-indigo-700 shadow-lg hover:bg-indigo-50 hover:-translate-y-0.5 transition-all duration-150">
+                View all tickets
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </a>
         </div>
     </div>
 
-    {{-- Stat cards --}}
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-6">
-        @foreach ([
-            ['label' => 'Open',          'key' => 'open',          'color' => 'emerald', 'filter' => ['status' => 'open'],                        'desc' => 'New requests'],
-            ['label' => 'Pending',       'key' => 'pending',       'color' => 'amber',   'filter' => ['status' => 'pending'],                     'desc' => 'In progress'],
-            ['label' => 'Unassigned',    'key' => 'unassigned',    'color' => 'rose',    'filter' => ['assigned_to' => 'unassigned'],             'desc' => 'Needs owner'],
-            ['label' => 'Assigned to me','key' => 'assigned_to_me','color' => 'indigo',  'filter' => ['assigned_to' => auth()->id()],             'desc' => 'Your queue'],
-            ['label' => 'Resolved',      'key' => 'resolved',      'color' => 'blue',    'filter' => ['status' => 'resolved'],                    'desc' => 'Ready to close'],
-            ['label' => 'Closed',        'key' => 'closed',        'color' => 'slate',   'filter' => ['status' => 'closed'],                      'desc' => 'Completed'],
-        ] as $card)
-            @php
-                $colors = [
-                    'emerald' => ['border' => 'border-emerald-200', 'bg' => 'bg-emerald-50',  'dt' => 'text-emerald-700', 'dd' => 'text-emerald-800', 'desc' => 'text-emerald-600'],
-                    'amber'   => ['border' => 'border-amber-200',   'bg' => 'bg-amber-50',    'dt' => 'text-amber-700',   'dd' => 'text-amber-800',   'desc' => 'text-amber-600'],
-                    'rose'    => ['border' => 'border-rose-200',    'bg' => 'bg-rose-50',     'dt' => 'text-rose-700',    'dd' => 'text-rose-800',    'desc' => 'text-rose-600'],
-                    'indigo'  => ['border' => 'border-indigo-200',  'bg' => 'bg-indigo-50',   'dt' => 'text-indigo-700',  'dd' => 'text-indigo-800',  'desc' => 'text-indigo-600'],
-                    'blue'    => ['border' => 'border-blue-200',    'bg' => 'bg-blue-50',     'dt' => 'text-blue-700',    'dd' => 'text-blue-800',    'desc' => 'text-blue-600'],
-                    'slate'   => ['border' => 'border-slate-200',   'bg' => 'bg-white',       'dt' => 'text-slate-500',   'dd' => 'text-slate-700',   'desc' => 'text-slate-400'],
-                ][$card['color']];
-            @endphp
+    {{-- ── STAT CARDS ───────────────────────────────────────────────────────── --}}
+    @php
+    $cards = [
+        ['label' => 'Open',           'key' => 'open',           'color' => '#10b981', 'light' => '#d1fae5', 'filter' => ['status' => 'open']],
+        ['label' => 'Pending',        'key' => 'pending',        'color' => '#f59e0b', 'light' => '#fef3c7', 'filter' => ['status' => 'pending']],
+        ['label' => 'Unassigned',     'key' => 'unassigned',     'color' => '#ef4444', 'light' => '#fee2e2', 'filter' => ['assigned_to' => 'unassigned']],
+        ['label' => 'Assigned to me', 'key' => 'assigned_to_me', 'color' => '#6366f1', 'light' => '#e0e7ff', 'filter' => ['assigned_to' => auth()->id()]],
+        ['label' => 'Resolved',       'key' => 'resolved',       'color' => '#3b82f6', 'light' => '#dbeafe', 'filter' => ['status' => 'resolved']],
+        ['label' => 'Closed',         'key' => 'closed',         'color' => '#94a3b8', 'light' => '#f1f5f9', 'filter' => ['status' => 'closed']],
+    ];
+    @endphp
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+        @foreach ($cards as $i => $card)
             <a href="{{ route('admin.tickets.index', $card['filter']) }}"
-               class="rounded-2xl border {{ $colors['border'] }} {{ $colors['bg'] }} p-5 shadow-sm hover:shadow-md transition group">
-                <dt class="text-xs font-semibold uppercase tracking-wide {{ $colors['dt'] }}">{{ $card['label'] }}</dt>
-                <dd class="mt-2 text-4xl font-extrabold {{ $colors['dd'] }} group-hover:scale-105 transition-transform origin-left">
-                    {{ $stats[$card['key']] }}
-                </dd>
-                <p class="mt-1 text-xs {{ $colors['desc'] }}">{{ $card['desc'] }}</p>
+               class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-200 group animate-fade-in-up"
+               style="animation-delay: {{ $i * 0.05 }}s;">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
+                         style="background-color: {{ $card['light'] }};">
+                        <div class="w-3.5 h-3.5 rounded-full" style="background-color: {{ $card['color'] }};"></div>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-200 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+                <p class="text-3xl font-extrabold text-gray-900 tabular-nums">{{ $stats[$card['key']] }}</p>
+                <p class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-wider">{{ $card['label'] }}</p>
             </a>
         @endforeach
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-3 mb-6">
-        {{-- Mini donut chart --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p class="text-sm font-semibold text-slate-900 mb-1">Queue breakdown</p>
-            <p class="text-xs text-slate-400 mb-4">Active ticket distribution.</p>
-            @php $total = $stats['open'] + $stats['pending'] + $stats['resolved'] + $stats['closed']; @endphp
-            @if ($total > 0)
-                <div class="flex justify-center">
-                    <div class="w-36 h-36"><canvas id="queueChart"></canvas></div>
+    {{-- ── BOTTOM GRID ──────────────────────────────────────────────────────── --}}
+    <div class="grid gap-5 lg:grid-cols-3">
+
+        {{-- Donut chart --}}
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="font-bold text-gray-900">Queue Breakdown</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Ticket distribution by status</p>
                 </div>
-                <ul class="mt-4 space-y-2">
+                @php $total = $stats['open'] + $stats['pending'] + $stats['resolved'] + $stats['closed']; @endphp
+                <span class="text-xs font-bold text-gray-500 bg-gray-100 rounded-full px-3 py-1">{{ $total }} total</span>
+            </div>
+
+            @if ($total > 0)
+                <div class="flex justify-center mb-5">
+                    <div class="relative w-36 h-36">
+                        <canvas id="queueChart"></canvas>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span class="text-2xl font-extrabold text-gray-800">{{ $total }}</span>
+                            <span class="text-xs text-gray-400">tickets</span>
+                        </div>
+                    </div>
+                </div>
+                <ul class="space-y-3">
                     @foreach ([
-                        ['label' => 'Open',     'val' => $stats['open'],     'color' => 'bg-emerald-500'],
-                        ['label' => 'Pending',  'val' => $stats['pending'],  'color' => 'bg-amber-500'],
-                        ['label' => 'Resolved', 'val' => $stats['resolved'], 'color' => 'bg-blue-500'],
-                        ['label' => 'Closed',   'val' => $stats['closed'],   'color' => 'bg-slate-300'],
+                        ['label' => 'Open',     'val' => $stats['open'],     'color' => '#10b981'],
+                        ['label' => 'Pending',  'val' => $stats['pending'],  'color' => '#f59e0b'],
+                        ['label' => 'Resolved', 'val' => $stats['resolved'], 'color' => '#3b82f6'],
+                        ['label' => 'Closed',   'val' => $stats['closed'],   'color' => '#cbd5e1'],
                     ] as $row)
-                        <li class="flex items-center justify-between text-xs">
-                            <span class="flex items-center gap-2 text-slate-600">
-                                <span class="w-2 h-2 rounded-full {{ $row['color'] }}"></span>
-                                {{ $row['label'] }}
-                            </span>
-                            <span class="font-semibold text-slate-800">{{ $row['val'] }}</span>
+                        <li class="flex items-center gap-3">
+                            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ $row['color'] }};"></span>
+                            <span class="flex-1 text-sm text-gray-600">{{ $row['label'] }}</span>
+                            <span class="text-sm font-bold text-gray-800">{{ $row['val'] }}</span>
+                            <span class="text-xs text-gray-400 w-8 text-right">{{ $total > 0 ? round(($row['val'] / $total) * 100) : 0 }}%</span>
                         </li>
                     @endforeach
                 </ul>
             @else
-                <div class="flex items-center justify-center h-36 text-sm text-slate-400">No tickets yet.</div>
+                <div class="flex flex-col items-center justify-center h-48 text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-3">
+                        <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-500">No tickets yet</p>
+                </div>
             @endif
         </div>
 
         {{-- Latest tickets --}}
-        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
-            <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm lg:col-span-2 flex flex-col">
+            <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                 <div>
-                    <p class="font-semibold text-slate-900">Latest tickets</p>
-                    <p class="text-xs text-slate-400 mt-0.5">Most recent activity across all students.</p>
+                    <h3 class="font-bold text-gray-900">Latest Tickets</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Most recent activity across all students</p>
                 </div>
                 <a href="{{ route('admin.tickets.index') }}"
-                   class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
-                    View all
-                </a>
+                   class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition">View all →</a>
             </div>
-            <ul class="divide-y divide-slate-100">
+
+            <ul class="flex-1 divide-y divide-gray-50">
                 @forelse ($recentTickets as $ticket)
-                    <li class="flex items-center justify-between gap-4 px-5 py-3.5 hover:bg-slate-50 transition">
-                        <div class="min-w-0">
-                            <a href="{{ route('admin.tickets.show', $ticket) }}"
-                               class="text-sm font-semibold text-slate-900 hover:text-indigo-600 hover:underline truncate block">
-                                #{{ $ticket->id }} — {{ Str::limit($ticket->subject, 50) }}
-                            </a>
-                            <p class="text-xs text-slate-400 mt-0.5">
-                                {{ $ticket->user->name }} · {{ $ticket->category->name }} · {{ $ticket->assignee?->name ?? 'Unassigned' }}
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $ticket->status->badgeClass() }}">
-                                {{ $ticket->status->label() }}
-                            </span>
-                            <span class="text-xs text-slate-400 hidden sm:block">{{ $ticket->updated_at->diffForHumans() }}</span>
+                    <li class="group px-6 py-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <span class="text-xs font-mono font-bold text-gray-400">#{{ $ticket->id }}</span>
+                                    <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $ticket->status->badgeClass() }}">{{ $ticket->status->label() }}</span>
+                                    <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $ticket->priority->badgeClass() }}">{{ $ticket->priority->label() }}</span>
+                                </div>
+                                <a href="{{ route('admin.tickets.show', $ticket) }}"
+                                   class="text-sm font-semibold text-gray-900 hover:text-indigo-600 truncate block transition">
+                                    {{ Str::limit($ticket->subject, 55) }}
+                                </a>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    {{ $ticket->user->name }} · {{ $ticket->category->name }}
+                                    @if ($ticket->assignee)
+                                        · <span class="text-indigo-500 font-medium">{{ $ticket->assignee->name }}</span>
+                                    @else
+                                        · <span class="text-red-400">Unassigned</span>
+                                    @endif
+                                </p>
+                            </div>
+                            <span class="text-xs text-gray-400 shrink-0 mt-1">{{ $ticket->updated_at->diffForHumans() }}</span>
                         </div>
                     </li>
                 @empty
-                    <li class="px-5 py-12 text-center text-sm text-slate-400">No tickets yet.</li>
+                    <li class="px-6 py-16 text-center">
+                        <p class="text-sm text-gray-400">No tickets yet.</p>
+                    </li>
                 @endforelse
             </ul>
+
+            <div class="border-t border-gray-100 px-6 py-4">
+                <a href="{{ route('admin.tickets.index') }}"
+                   class="flex items-center justify-center gap-2 text-sm font-semibold text-gray-500 hover:text-indigo-600 transition">
+                    View all tickets
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -132,7 +172,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const ctx = document.getElementById('queueChart');
-    if (ctx && {{ $total }} > 0) {
+    if (ctx && {{ $stats['open'] + $stats['pending'] + $stats['resolved'] + $stats['closed'] }} > 0) {
         new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -140,13 +180,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     data: [{{ $stats['open'] }}, {{ $stats['pending'] }}, {{ $stats['resolved'] }}, {{ $stats['closed'] }}],
                     backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#cbd5e1'],
-                    borderWidth: 2,
-                    borderColor: '#fff',
-                    hoverOffset: 4,
+                    borderWidth: 4,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6,
                 }]
             },
             options: {
-                cutout: '70%',
+                cutout: '75%',
                 plugins: { legend: { display: false } },
                 responsive: true,
                 maintainAspectRatio: true,

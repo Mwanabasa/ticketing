@@ -7,7 +7,6 @@ use App\Enums\TicketStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\TimeEntry;
 
 class Ticket extends Model
 {
@@ -20,14 +19,26 @@ class Ticket extends Model
         'status',
         'priority',
         'attachment_path',
+        'due_at',
+        'rating',
+        'rating_comment',
     ];
 
     protected function casts(): array
     {
         return [
-            'status' => TicketStatus::class,
+            'status'   => TicketStatus::class,
             'priority' => TicketPriority::class,
+            'due_at'   => 'datetime',
+            'rating'   => 'integer',
         ];
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->due_at !== null
+            && $this->due_at->isPast()
+            && ! in_array($this->status, [TicketStatus::Resolved, TicketStatus::Closed]);
     }
 
     public function user(): BelongsTo

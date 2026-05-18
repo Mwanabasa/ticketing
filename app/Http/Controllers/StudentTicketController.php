@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
 use App\Http\Requests\ReplyRequest;
 use App\Http\Requests\StoreTicketRequest;
 use App\Models\Category;
+use App\Models\KnowledgeBaseArticle;
 use App\Models\Ticket;
 use App\Models\TicketTemplate;
 use Illuminate\Http\RedirectResponse;
@@ -40,8 +40,7 @@ class StudentTicketController extends Controller
             });
         }
 
-        $tickets = $query->latest()->paginate(15)->withQueryString();
-
+        $tickets    = $query->latest()->paginate(15)->withQueryString();
         $categories = Category::query()->orderBy('name')->get();
 
         return view('student.tickets.index', compact('tickets', 'categories'));
@@ -50,7 +49,7 @@ class StudentTicketController extends Controller
     public function create(): View
     {
         $categories = Category::query()->orderBy('name')->get();
-        $templates = TicketTemplate::query()->where('is_active', true)->with('category')->orderBy('name')->get();
+        $templates  = TicketTemplate::query()->where('is_active', true)->with('category')->orderBy('name')->get();
 
         return view('student.tickets.create', compact('categories', 'templates'));
     }
@@ -65,12 +64,12 @@ class StudentTicketController extends Controller
         }
 
         $ticket = Ticket::query()->create([
-            'user_id' => $request->user()->id,
-            'category_id' => $validated['category_id'],
-            'subject' => $validated['subject'],
-            'description' => $validated['description'],
-            'status' => TicketStatus::Open,
-            'priority' => $validated['priority'],
+            'user_id'         => $request->user()->id,
+            'category_id'     => $validated['category_id'],
+            'subject'         => $validated['subject'],
+            'description'     => $validated['description'],
+            'status'          => TicketStatus::Open,
+            'priority'        => $validated['priority'],
             'attachment_path' => $attachmentPath,
         ]);
 
@@ -85,7 +84,14 @@ class StudentTicketController extends Controller
 
         $ticket->load(['category', 'assignee', 'replies.user']);
 
-        return view('student.tickets.show', compact('ticket'));
+        $suggestions = KnowledgeBaseArticle::query()
+            ->where('is_published', true)
+            ->where('category_id', $ticket->category_id)
+            ->where('id', '!=', 0)
+            ->limit(3)
+            ->get();
+
+        return view('student.tickets.show', compact('ticket', 'suggestions'));
     }
 
     public function reply(ReplyRequest $request, Ticket $ticket): RedirectResponse
@@ -96,7 +102,7 @@ class StudentTicketController extends Controller
 
         $ticket->replies()->create([
             'user_id' => $request->user()->id,
-            'body' => $validated['body'],
+            'body'    => $validated['body'],
         ]);
 
         if ($ticket->status === TicketStatus::Resolved) {
@@ -104,5 +110,30 @@ class StudentTicketController extends Controller
         }
 
         return back()->with('status', 'Your message was posted.');
+    }
+
+    public function rate(Request $request, Ticket $ticket): RedirectResponse
+    {
+        $this->authorize('view', $ticket);
+
+        if (! in_array($ticket->status, [TicketStatus::Resolved, TicketStatus::Closed])) {
+            return back()->withErrors(['rating' => 'You can only rate resolved or closed tickets.']);
+        }
+
+        if ($ticket->rating) {
+            return back()->withErrors(['rating' => 'You have already rated this ticket.']);
+        }
+
+        $validated = $request->validate([
+            'rating'         => ['required', 'integer', 'min:1', 'max:5'],
+            'rating_comment' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $ticket->update([
+            'rating'         => $validated['rating'],
+            'rating_comment' => $validated['rating_comment'] ?? null,
+        ]);
+
+        return back()->with('status', 'Thank you for your feedback!');
     }
 }
