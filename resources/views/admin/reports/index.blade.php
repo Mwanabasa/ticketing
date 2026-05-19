@@ -11,20 +11,36 @@
 
     {{-- Date filter --}}
     <div class="card p-5 mb-6">
-        <form method="GET" action="{{ route('admin.reports.index') }}" class="flex flex-wrap items-end gap-4">
-            <div>
-                <label for="from" class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">From date</label>
-                <input id="from" name="from" type="date" value="{{ optional($from)->format('Y-m-d') }}" class="input py-2.5 text-sm w-auto">
+        <div class="flex flex-wrap items-end justify-between gap-4">
+            <form method="GET" action="{{ route('admin.reports.index') }}" class="flex flex-wrap items-end gap-4">
+                <div>
+                    <label for="from" class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">From date</label>
+                    <input id="from" name="from" type="date" value="{{ optional($from)->format('Y-m-d') }}" class="input py-2.5 text-sm w-auto">
+                </div>
+                <div>
+                    <label for="to" class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">To date</label>
+                    <input id="to" name="to" type="date" value="{{ optional($to)->format('Y-m-d') }}" class="input py-2.5 text-sm w-auto">
+                </div>
+                <button type="submit" class="btn btn-primary">Apply Filter</button>
+                @if ($from || $to)
+                    <a href="{{ route('admin.reports.index') }}" class="btn btn-secondary">Clear</a>
+                @endif
+            </form>
+
+            {{-- Export buttons --}}
+            <div class="flex items-center gap-2">
+                <a href="{{ route('admin.reports.export.excel', array_filter(['from' => optional($from)->format('Y-m-d'), 'to' => optional($to)->format('Y-m-d')])) }}"
+                   class="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Excel
+                </a>
+                <a href="{{ route('admin.reports.export.pdf', array_filter(['from' => optional($from)->format('Y-m-d'), 'to' => optional($to)->format('Y-m-d')])) }}"
+                   class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-100 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    PDF
+                </a>
             </div>
-            <div>
-                <label for="to" class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">To date</label>
-                <input id="to" name="to" type="date" value="{{ optional($to)->format('Y-m-d') }}" class="input py-2.5 text-sm w-auto">
-            </div>
-            <button type="submit" class="btn btn-primary">Apply Filter</button>
-            @if ($from || $to)
-                <a href="{{ route('admin.reports.index') }}" class="btn btn-secondary">Clear</a>
-            @endif
-        </form>
+        </div>
         @error('to') <p class="mt-2 text-xs text-red-600">{{ $message }}</p> @enderror
         @if ($from || $to)
             <p class="mt-3 text-xs text-indigo-600 font-semibold">
