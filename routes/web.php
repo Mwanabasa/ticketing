@@ -70,11 +70,11 @@ Route::middleware(['auth', 'role:student'])->group(function (): void {
     Route::get('/tickets/{ticket}', [StudentTicketController::class, 'show'])->name('student.tickets.show');
     Route::post('/tickets/{ticket}/replies', [StudentTicketController::class, 'reply'])->name('student.tickets.replies.store');
     Route::post('/tickets/{ticket}/rate', [StudentTicketController::class, 'rate'])->name('student.tickets.rate');
-    Route::post('/tickets/{ticket}/rate', [StudentTicketController::class, 'rate'])->name('student.tickets.rate');
 });
 
 // ── Notifications (both roles) ────────────────────────────────────────────────
 Route::middleware(['auth'])->group(function (): void {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
 });
@@ -107,8 +107,8 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
 
     // Reports
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export/excel', [AdminReportController::class, 'exportExcel'])->name('reports.export.excel');
-    Route::get('/reports/export/pdf', [AdminReportController::class, 'exportPdf'])->name('reports.export.pdf');
+    Route::get('/reports/export/excel', [AdminReportController::class, 'exportExcel'])->middleware('throttle:10,1')->name('reports.export.excel');
+    Route::get('/reports/export/pdf', [AdminReportController::class, 'exportPdf'])->middleware('throttle:10,1')->name('reports.export.pdf');
 
     // Knowledge base
     Route::get('/knowledge-base', [AdminKnowledgeBaseController::class, 'index'])->name('knowledge-base.index');

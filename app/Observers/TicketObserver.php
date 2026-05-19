@@ -25,13 +25,17 @@ class TicketObserver
         $this->logAction('updated', $ticket, $old ?: null, $new ?: null);
 
         if ($ticket->wasChanged('assigned_to') && $ticket->assigned_to && $ticket->assignee) {
-            Mail::to($ticket->assignee)->send(new TicketAssignedNotification($ticket));
+            try {
+                Mail::to($ticket->assignee)->send(new TicketAssignedNotification($ticket));
+            } catch (\Throwable) {}
         }
 
         if ($ticket->wasChanged('status')) {
             $oldStatus = $ticket->getOriginal('status');
             $oldVal    = $oldStatus instanceof \App\Enums\TicketStatus ? $oldStatus->value : (string) $oldStatus;
-            Mail::to($ticket->user)->send(new TicketStatusChangedNotification($ticket, $oldVal, $ticket->status->value));
+            try {
+                Mail::to($ticket->user)->send(new TicketStatusChangedNotification($ticket, $oldVal, $ticket->status->value));
+            } catch (\Throwable) {}
         }
     }
 

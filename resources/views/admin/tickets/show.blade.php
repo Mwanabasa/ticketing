@@ -4,6 +4,16 @@
 @section('page_title', 'Ticket #'.$ticket->id)
 @section('page_subtitle', $ticket->subject)
 
+@push('head')
+<style>
+.pri-low    { color:#6b7280;font-weight:600;font-size:11px; }
+.pri-medium { color:#2563eb;font-weight:600;font-size:11px; }
+.pri-high   { color:#d97706;font-weight:700;font-size:11px; }
+.pri-urgent { color:#dc2626;font-weight:700;font-size:11px; }
+.av { width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0; }
+</style>
+@endpush
+
 @section('content')
 
     {{-- Back + actions --}}
@@ -95,39 +105,46 @@
 
             {{-- Conversation --}}
             @if ($ticket->replies->isNotEmpty())
-                <div class="space-y-3">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 px-1">
-                        Conversation · {{ $ticket->replies->count() }} {{ Str::plural('reply', $ticket->replies->count()) }}
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 px-1 mb-4">
+                        Conversation &middot; {{ $ticket->replies->count() }} {{ Str::plural('reply', $ticket->replies->count()) }}
                     </p>
-                    @foreach ($ticket->replies as $reply)
-                        <div class="rounded-2xl border p-4 shadow-sm
-                            {{ $reply->user->isStaff() ? 'bg-indigo-50 border-indigo-100' : 'bg-white border-slate-200' }}">
-                            <div class="flex items-center justify-between gap-2 mb-3">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0
-                                        {{ $reply->user->isStaff() ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700' }}">
-                                        {{ strtoupper(substr($reply->user->name, 0, 1)) }}
-                                    </div>
-                                    <div>
-                                        <span class="text-sm font-semibold text-slate-900">{{ $reply->user->name }}</span>
-                                        @if ($reply->user->isStaff())
-                                            <span class="ml-1.5 rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">Staff</span>
-                                        @endif
-                                    </div>
+                    <div class="relative space-y-4">
+                        <div class="absolute left-4 top-4 bottom-4 w-px bg-slate-100"></div>
+                        @foreach ($ticket->replies as $reply)
+                            @php
+                                $isStaff = $reply->user->isStaff();
+                                $avatarBg = $isStaff ? 'linear-gradient(135deg,#4f46e5,#7c3aed)' : 'linear-gradient(135deg,#64748b,#94a3b8)';
+                            @endphp
+                            <div class="relative flex gap-4">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 z-10 ring-2 ring-white"
+                                     style="background: {{ $avatarBg }};">
+                                    {{ strtoupper(substr($reply->user->name, 0, 1)) }}
                                 </div>
-                                <span class="text-xs text-slate-400">{{ $reply->created_at->format('M j, Y g:i A') }}</span>
+                                <div class="flex-1 rounded-2xl border p-4 shadow-sm
+                                    {{ $isStaff ? 'bg-indigo-50 border-indigo-100' : 'bg-white border-slate-200' }}">
+                                    <div class="flex items-center justify-between gap-2 mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-semibold text-slate-900">{{ $reply->user->name }}</span>
+                                            @if ($isStaff)
+                                                <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700 uppercase tracking-wide">Staff</span>
+                                            @endif
+                                        </div>
+                                        <span class="text-xs text-slate-400">{{ $reply->created_at->format('M j, Y g:i A') }}</span>
+                                    </div>
+                                    <p class="whitespace-pre-wrap text-sm text-slate-700 leading-relaxed">{{ $reply->body }}</p>
+                                    @if ($reply->attachment_path)
+                                        <div class="mt-3">
+                                            <a href="{{ asset('storage/'.$reply->attachment_path) }}" target="_blank" rel="noopener">
+                                                <img src="{{ asset('storage/'.$reply->attachment_path) }}" alt="Attachment"
+                                                     class="max-h-48 max-w-full rounded-xl border border-slate-200 object-contain">
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
-                            <p class="whitespace-pre-wrap text-sm text-slate-700 leading-relaxed">{{ $reply->body }}</p>
-                            @if ($reply->attachment_path)
-                                <div class="mt-3">
-                                    <a href="{{ asset('storage/'.$reply->attachment_path) }}" target="_blank" rel="noopener">
-                                        <img src="{{ asset('storage/'.$reply->attachment_path) }}" alt="Attachment"
-                                             class="max-h-48 max-w-full rounded-xl border border-slate-200 object-contain">
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
             @endif
 
@@ -206,40 +223,92 @@
 
             {{-- Info --}}
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-                <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Ticket info</p>
-                <dl class="space-y-2.5 text-sm">
+                <p class="text-[10px] font-bold uppercase tracking-widest mb-4" style="color:#94a3b8;">Ticket info</p>
+
+                {{-- Requester card --}}
+                <div class="mb-4">
+                    <p class="text-[10px] font-bold uppercase tracking-widest mb-2" style="color:#94a3b8;">Requester</p>
+                    @php
+                        $avatarColors = ['#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981','#3b82f6','#ef4444'];
+                        $sc = $avatarColors[crc32($ticket->user->name) % count($avatarColors)];
+                    @endphp
+                    <div class="flex items-center gap-2.5 rounded-lg p-2.5" style="background:#f8fafc;border:1px solid #f1f5f9;">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:{{ $sc }};">
+                            {{ strtoupper(substr($ticket->user->name, 0, 1)) }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold text-gray-800 truncate">{{ $ticket->user->name }}</p>
+                            <p class="text-[10px] truncate" style="color:#94a3b8;">{{ $ticket->user->email }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Agent card --}}
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-[10px] font-bold uppercase tracking-widest" style="color:#94a3b8;">Agent</p>
+                        @if ($ticket->assigned_to !== auth()->id())
+                            <form method="POST" action="{{ route('admin.tickets.update', $ticket) }}">
+                                @csrf @method('PATCH')
+                                <input type="hidden" name="status" value="{{ $ticket->status->value }}">
+                                <input type="hidden" name="priority" value="{{ $ticket->priority->value }}">
+                                <input type="hidden" name="assigned_to" value="{{ auth()->id() }}">
+                                <button type="submit" class="text-[10px] font-bold" style="color:#6366f1;">Assign me</button>
+                            </form>
+                        @endif
+                    </div>
+                    @if ($ticket->assignee)
+                        @php $ac = $avatarColors[crc32($ticket->assignee->name) % count($avatarColors)]; @endphp
+                        <div class="flex items-center gap-2.5 rounded-lg p-2.5" style="background:#f8fafc;border:1px solid #f1f5f9;">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:{{ $ac }};">
+                                {{ strtoupper(substr($ticket->assignee->name, 0, 1)) }}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold text-gray-800 truncate">{{ $ticket->assignee->name }}</p>
+                                <p class="text-[10px] truncate" style="color:#94a3b8;">{{ $ticket->assignee->email }}</p>
+                            </div>
+                        </div>
+                    @else
+                        <p class="text-xs font-medium" style="color:#ef4444;">No agent assigned</p>
+                    @endif
+                </div>
+
+                {{-- Other meta --}}
+                <dl class="space-y-2.5 text-sm" style="border-top:1px solid #f1f5f9;padding-top:12px;">
                     @foreach ([
-                        ['Student',      $ticket->user->name],
-                        ['Email',        $ticket->user->email],
                         ['Category',     $ticket->category->name],
-                        ['Assignee',     $ticket->assignee?->name ?? 'Unassigned'],
+                        ['Priority',     $ticket->priority->label()],
                         ['Replies',      $ticket->replies->count()],
                         ['Opened',       $ticket->created_at->format('M j, Y')],
                         ['Last updated', $ticket->updated_at->diffForHumans()],
                     ] as [$label, $value])
                         <div class="flex justify-between gap-2">
-                            <dt class="text-slate-400 shrink-0">{{ $label }}</dt>
-                            <dd class="font-medium text-slate-800 text-right truncate">{{ $value }}</dd>
+                            <dt class="text-xs shrink-0" style="color:#94a3b8;">{{ $label }}</dt>
+                            @if ($label === 'Priority')
+                                <dd class="pri-{{ $ticket->priority->value }}">{{ strtoupper($value) }}</dd>
+                            @else
+                                <dd class="text-xs font-medium text-gray-700 text-right truncate">{{ $value }}</dd>
+                            @endif
                         </div>
                     @endforeach
                     @if ($ticket->due_at)
                         <div class="flex justify-between gap-2">
-                            <dt class="text-slate-400 shrink-0">SLA due</dt>
-                            <dd class="font-medium text-right {{ $ticket->isOverdue() ? 'text-red-600' : 'text-slate-800' }}">
+                            <dt class="text-xs shrink-0" style="color:#94a3b8;">SLA due</dt>
+                            <dd class="text-xs font-medium text-right {{ $ticket->isOverdue() ? 'text-red-600' : 'text-gray-700' }}">
                                 {{ $ticket->due_at->format('M j, Y g:i A') }}
-                                @if ($ticket->isOverdue()) <span class="text-xs">(overdue)</span> @endif
+                                @if ($ticket->isOverdue()) <span class="text-[10px]">(overdue)</span> @endif
                             </dd>
                         </div>
                     @endif
                     @if ($ticket->rating)
-                        <div class="flex justify-between items-center pt-2 border-t border-slate-100">
-                            <dt class="text-slate-400">Rating</dt>
-                            <dd class="flex items-center gap-0.5 text-amber-400">
+                        <div class="flex justify-between items-center" style="border-top:1px solid #f1f5f9;padding-top:8px;">
+                            <dt class="text-xs" style="color:#94a3b8;">Rating</dt>
+                            <dd class="flex items-center gap-0.5 text-amber-400 text-sm">
                                 @for ($i = 1; $i <= 5; $i++){{ $i <= $ticket->rating ? '★' : '☆' }}@endfor
                             </dd>
                         </div>
                         @if ($ticket->rating_comment)
-                            <p class="text-xs text-slate-400 italic">"{{ $ticket->rating_comment }}"</p>
+                            <p class="text-xs italic" style="color:#94a3b8;">"{{ $ticket->rating_comment }}"</p>
                         @endif
                     @endif
                 </dl>

@@ -83,20 +83,32 @@
                 <label for="attachment" class="block text-sm font-medium text-slate-700 mb-1.5">
                     Screenshot <span class="text-slate-400 font-normal">(optional)</span>
                 </label>
-                <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-center hover:border-indigo-400 hover:bg-indigo-50/30 transition">
-                    <input id="attachment" name="attachment" type="file" accept="image/*,application/pdf"
-                        class="block w-full text-sm text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-indigo-700 transition cursor-pointer">
-                    <p class="mt-2 text-xs text-slate-400">PNG, JPG, PDF · Max 4 MB</p>
-                </div>
+                <label for="attachment"
+                       class="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-6 py-8 cursor-pointer
+                              hover:border-indigo-400 hover:bg-indigo-50/30 transition-all duration-200 group">
+                    <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:border-indigo-200 group-hover:shadow-indigo-100 transition-all">
+                        <svg class="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 transition-colors">Click to upload a screenshot</p>
+                        <p class="text-xs text-slate-400 mt-0.5">PNG, JPG, PDF &middot; Max 4 MB</p>
+                    </div>
+                    <input id="attachment" name="attachment" type="file" accept="image/*,application/pdf" class="sr-only">
+                </label>
+                <p id="file-name" class="mt-2 text-xs text-indigo-600 font-medium hidden"></p>
             </div>
 
             <div class="flex gap-3 pt-2 border-t border-slate-100">
                 <button type="submit"
-                        class="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition">
+                        class="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                        style="background: linear-gradient(135deg, #4f46e5, #7c3aed); box-shadow: 0 4px 14px rgba(79,70,229,0.35);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     Submit ticket
                 </button>
                 <a href="{{ route('student.tickets.index') }}"
-                   class="rounded-lg border border-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                   class="inline-flex items-center rounded-xl border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
                     Cancel
                 </a>
             </div>
@@ -150,6 +162,20 @@ function searchKB(query) {
             }).catch(() => box.classList.add('hidden'));
     }, 400);
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('attachment');
+    const label = document.getElementById('file-name');
+    if (input && label) {
+        input.addEventListener('change', () => {
+            if (input.files.length) {
+                label.textContent = '✔ ' + input.files[0].name;
+                label.classList.remove('hidden');
+            } else {
+                label.classList.add('hidden');
+            }
+        });
+    }
+});
 </script>
 @endpush
 @endsection
