@@ -70,39 +70,50 @@
 
             {{-- Conversation --}}
             @if ($ticket->replies->isNotEmpty())
-                <div class="space-y-3">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 px-1">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 px-1 mb-4">
                         Conversation · {{ $ticket->replies->count() }} {{ Str::plural('reply', $ticket->replies->count()) }}
                     </p>
-                    @foreach ($ticket->replies as $reply)
-                        <div class="rounded-2xl border p-4 shadow-sm
-                            {{ $reply->user->isStaff() ? 'bg-indigo-50 border-indigo-100' : 'bg-white border-slate-200' }}">
-                            <div class="flex items-center justify-between gap-2 mb-3">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0
-                                        {{ $reply->user->isStaff() ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700' }}">
-                                        {{ strtoupper(substr($reply->user->name, 0, 1)) }}
-                                    </div>
-                                    <div>
-                                        <span class="text-sm font-semibold text-slate-900">{{ $reply->user->name }}</span>
-                                        @if ($reply->user->isStaff())
-                                            <span class="ml-1.5 rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">Staff</span>
-                                        @endif
-                                    </div>
+                    <div class="relative space-y-4">
+                        {{-- Timeline line --}}
+                        <div class="absolute left-4 top-4 bottom-4 w-px bg-slate-100"></div>
+
+                        @foreach ($ticket->replies as $reply)
+                            @php
+                                $isStaff = $reply->user->isStaff();
+                                $avatarBg = $isStaff ? 'linear-gradient(135deg,#4f46e5,#7c3aed)' : 'linear-gradient(135deg,#64748b,#94a3b8)';
+                            @endphp
+                            <div class="relative flex gap-4">
+                                {{-- Avatar on timeline --}}
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 z-10 ring-2 ring-white"
+                                     style="background: {{ $avatarBg }};">
+                                    {{ strtoupper(substr($reply->user->name, 0, 1)) }}
                                 </div>
-                                <span class="text-xs text-slate-400">{{ $reply->created_at->format('M j, Y g:i A') }}</span>
+
+                                <div class="flex-1 rounded-2xl border p-4 shadow-sm
+                                    {{ $isStaff ? 'bg-indigo-50 border-indigo-100' : 'bg-white border-slate-200' }}">
+                                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-semibold text-slate-900">{{ $reply->user->name }}</span>
+                                            @if ($isStaff)
+                                                <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700 uppercase tracking-wide">Staff</span>
+                                            @endif
+                                        </div>
+                                        <span class="text-xs text-slate-400">{{ $reply->created_at->format('M j, Y g:i A') }}</span>
+                                    </div>
+                                    <p class="whitespace-pre-wrap text-sm text-slate-700 leading-relaxed">{{ $reply->body }}</p>
+                                    @if ($reply->attachment_path)
+                                        <div class="mt-3">
+                                            <a href="{{ asset('storage/'.$reply->attachment_path) }}" target="_blank" rel="noopener">
+                                                <img src="{{ asset('storage/'.$reply->attachment_path) }}" alt="Attachment"
+                                                     class="max-h-48 max-w-full rounded-xl border border-slate-200 object-contain">
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
-                            <p class="whitespace-pre-wrap text-sm text-slate-700 leading-relaxed">{{ $reply->body }}</p>
-                            @if ($reply->attachment_path)
-                                <div class="mt-3">
-                                    <a href="{{ asset('storage/'.$reply->attachment_path) }}" target="_blank" rel="noopener">
-                                        <img src="{{ asset('storage/'.$reply->attachment_path) }}" alt="Attachment"
-                                             class="max-h-48 max-w-full rounded-xl border border-slate-200 object-contain">
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
             @endif
 

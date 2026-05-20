@@ -116,6 +116,10 @@ class StudentTicketController extends Controller
     {
         $this->authorize('view', $ticket);
 
+        if ($ticket->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
         if (! in_array($ticket->status, [TicketStatus::Resolved, TicketStatus::Closed])) {
             return back()->withErrors(['rating' => 'You can only rate resolved or closed tickets.']);
         }
