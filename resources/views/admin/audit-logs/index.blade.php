@@ -79,19 +79,54 @@
                     <td class="px-5 py-3.5 max-w-xs">
                         @if ($log->old_values || $log->new_values)
                             <details class="text-xs">
-                                <summary class="cursor-pointer text-indigo-600 hover:text-indigo-800 font-semibold select-none">View diff</summary>
+                                <summary class="cursor-pointer text-indigo-600 hover:text-indigo-800 font-semibold select-none">View changes</summary>
                                 <div class="mt-2 space-y-2">
-                                    @if ($log->old_values)
-                                        <div>
-                                            <p class="text-xs font-bold text-gray-500 mb-1">Before</p>
-                                            <pre class="rounded-xl bg-red-50 border border-red-100 p-2 text-xs text-red-800 overflow-x-auto whitespace-pre-wrap break-all">{{ json_encode($log->old_values, JSON_PRETTY_PRINT) }}</pre>
-                                        </div>
-                                    @endif
-                                    @if ($log->new_values)
-                                        <div>
-                                            <p class="text-xs font-bold text-gray-500 mb-1">After</p>
-                                            <pre class="rounded-xl bg-emerald-50 border border-emerald-100 p-2 text-xs text-emerald-800 overflow-x-auto whitespace-pre-wrap break-all">{{ json_encode($log->new_values, JSON_PRETTY_PRINT) }}</pre>
-                                        </div>
+                                    @php
+                                        $skip = ['id','created_at','updated_at','user_agent'];
+                                        $labels = [
+                                            'status'          => 'Status',
+                                            'priority'        => 'Priority',
+                                            'assigned_to'     => 'Assigned to',
+                                            'category_id'     => 'Category',
+                                            'subject'         => 'Subject',
+                                            'description'     => 'Description',
+                                            'due_at'          => 'Due date',
+                                            'rating'          => 'Rating',
+                                            'rating_comment'  => 'Rating comment',
+                                            'attachment_path' => 'Attachment',
+                                            'sla_breached_at' => 'SLA breached',
+                                        ];
+                                        $newVals = collect($log->new_values ?? [])->except($skip);
+                                        $oldVals = collect($log->old_values ?? [])->except($skip);
+                                        $fields  = $newVals->keys()->merge($oldVals->keys())->unique();
+                                    @endphp
+                                    @if ($fields->isNotEmpty())
+                                        <table class="w-full text-xs border-collapse">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-left py-1 pr-3 text-gray-400 font-semibold w-1/3">Field</th>
+                                                    <th class="text-left py-1 pr-3 text-red-500 font-semibold w-1/3">Before</th>
+                                                    <th class="text-left py-1 text-emerald-600 font-semibold w-1/3">After</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($fields as $field)
+                                                    @php
+                                                        $before = $oldVals->get($field);
+                                                        $after  = $newVals->get($field);
+                                                        $label  = $labels[$field] ?? ucwords(str_replace('_', ' ', $field));
+                                                        $fmt = fn($v) => is_null($v) ? '—' : (is_bool($v) ? ($v ? 'Yes' : 'No') : $v);
+                                                    @endphp
+                                                    <tr class="border-t border-gray-100">
+                                                        <td class="py-1 pr-3 text-gray-500 font-medium">{{ $label }}</td>
+                                                        <td class="py-1 pr-3 text-red-600">{{ $fmt($before) }}</td>
+                                                        <td class="py-1 text-emerald-700 font-semibold">{{ $fmt($after) }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    @else
+                                        <span class="text-gray-400">No field changes recorded.</span>
                                     @endif
                                 </div>
                             </details>
