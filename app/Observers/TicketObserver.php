@@ -19,8 +19,16 @@ class TicketObserver
 
     public function updated(Ticket $ticket): void
     {
-        $old = collect($ticket->getOriginal())->map(fn ($v) => $v instanceof \BackedEnum ? $v->value : $v)->toArray();
-        $new = collect($ticket->getChanges())->map(fn ($v) => $v instanceof \BackedEnum ? $v->value : $v)->toArray();
+        $changed = array_keys($ticket->getChanges());
+
+        $old = collect($ticket->getOriginal())
+            ->only($changed)
+            ->map(fn ($v) => $v instanceof \BackedEnum ? $v->value : $v)
+            ->toArray();
+
+        $new = collect($ticket->getChanges())
+            ->map(fn ($v) => $v instanceof \BackedEnum ? $v->value : $v)
+            ->toArray();
 
         $this->logAction('updated', $ticket, $old ?: null, $new ?: null);
 
