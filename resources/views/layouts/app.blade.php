@@ -157,9 +157,61 @@
     ];
 @endphp
 
-<div class="flex h-full overflow-hidden">
+<div class="flex h-full overflow-hidden" x-data="{ mobileNav: false }">
 
-    {{-- ══ SIDEBAR ══════════════════════════════════════════════════════════ --}}
+    {{-- MOBILE NAV DRAWER --}}
+    <div x-show="mobileNav" x-cloak class="fixed inset-0 z-50 flex lg:hidden" @keydown.escape.window="mobileNav = false">
+        <div class="absolute inset-0 bg-black/50" @click="mobileNav = false"></div>
+        <aside class="relative flex flex-col h-full z-10" style="background:linear-gradient(180deg,#0f0c29 0%,#1e1b4b 40%,#312e81 100%);width:220px;box-shadow:2px 0 32px rgba(0,0,0,.35);overflow:hidden;">
+            <div class="flex items-center gap-2.5 px-3 py-4" style="border-bottom:1px solid rgba(255,255,255,.06);">
+                <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </div>
+                <p class="text-sm font-bold text-white leading-none tracking-tight">HelpDesk</p>
+                <button @click="mobileNav = false" class="ml-auto text-white/50 hover:text-white transition" aria-label="Close navigation">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <nav class="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+                @foreach ($navItems as $item)
+                    @php $isActive = request()->routeIs($item['active']); @endphp
+                    <a href="{{ route($item['route']) }}" @click="mobileNav = false" class="nav-item {{ $isActive ? 'active' : '' }}">
+                        @switch($item['icon'])
+                            @case('grid')<svg class="ni" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>@break
+                            @case('ticket')<svg class="ni" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>@break
+                            @case('users')<svg class="ni" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>@break
+                            @case('tag')<svg class="ni" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>@break
+                            @case('file')<svg class="ni" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>@break
+                            @case('book')<svg class="ni" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>@break
+                            @case('chart')<svg class="ni" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>@break
+                            @case('log')<svg class="ni" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>@break
+                            @case('plus')<svg class="ni" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>@break
+                        @endswitch
+                        <span class="flex-1 truncate text-sm">{{ $item['label'] }}</span>
+                        @if (!empty($item['badge']) && $item['badge'] > 0)
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 bg-red-500 text-white" style="min-width:18px;text-align:center;line-height:1.4;">{{ $item['badge'] }}</span>
+                        @endif
+                    </a>
+                @endforeach
+            </nav>
+            <div class="p-2" style="border-top:1px solid rgba(255,255,255,.06);">
+                <div class="flex items-center gap-2.5 rounded-lg px-2 py-2.5" style="background:rgba(255,255,255,.04);">
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-semibold text-white truncate leading-none">{{ $user->name }}</p>
+                        <p class="text-[10px] mt-0.5 truncate" style="color:#5b5f7e;">{{ $user->role->label() }}</p>
+                    </div>
+                    <form method="POST" action="{{ route('logout') }}" class="shrink-0">@csrf
+                        <button type="submit" title="Sign out" style="color:#5b5f7e;" onmouseover="this.style.color='#a5b4fc'" onmouseout="this.style.color='#5b5f7e'">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    {{-- DESKTOP SIDEBAR --}}
     <aside class="sidebar hidden lg:flex flex-col h-full overflow-hidden">
 
         {{-- Logo --}}
@@ -230,6 +282,11 @@
 
         {{-- Topbar --}}
         <header class="topbar">
+            {{-- Hamburger (mobile/tablet) --}}
+            <button @click="mobileNav = true" class="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg hover:bg-black/5 transition shrink-0" aria-label="Open navigation">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+
             {{-- Page title --}}
             <div class="flex-1 min-w-0">
                 <h1 class="text-sm font-bold text-gray-900 truncate">@yield('page_title', 'Dashboard')</h1>
@@ -240,13 +297,6 @@
 
             {{-- Right side --}}
             <div class="flex items-center gap-2 shrink-0">
-                {{-- Mobile nav --}}
-                <nav class="flex flex-wrap items-center gap-1 lg:hidden">
-                    @foreach ($navItems as $item)
-                        <a href="{{ route($item['route']) }}" class="rounded px-2 py-1 text-xs font-semibold {{ request()->routeIs($item['active']) ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">{{ $item['label'] }}</a>
-                    @endforeach
-                </nav>
-
                 {{-- User chip --}}
                 <div class="hidden lg:flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5">
                     <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
@@ -262,13 +312,13 @@
         {{-- Content --}}
         <main class="flex-1 overflow-auto p-5">
             @if (session('status'))
-                <div class="mb-4 flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium fade-up" style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;">
+                <div data-flash class="mb-4 flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium fade-up" style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     {{ session('status') }}
                 </div>
             @endif
             @if ($errors->any())
-                <div class="mb-4 flex items-start gap-2.5 rounded-xl px-4 py-3 text-sm fade-up" style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;">
+                <div data-flash class="mb-4 flex items-start gap-2.5 rounded-xl px-4 py-3 text-sm fade-up" style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;">
                     <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <ul class="space-y-0.5">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
                 </div>
@@ -302,5 +352,6 @@
     </footer>
 </div>
 @endauth
+@stack('scripts')
 </body>
 </html>
