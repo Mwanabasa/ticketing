@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 
 class KnowledgeBaseArticle extends Model
 {
@@ -31,6 +32,11 @@ class KnowledgeBaseArticle extends Model
 
     public function incrementViews(): void
     {
-        $this->increment('views');
+        // Debounce: only count one view per visitor per article per hour using cache
+        $key = 'kb_view_' . $this->id . '_' . request()->ip();
+        if (! Cache::has($key)) {
+            Cache::put($key, true, now()->addHour());
+            $this->increment('views');
+        }
     }
 }

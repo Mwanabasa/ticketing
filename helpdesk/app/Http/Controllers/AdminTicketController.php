@@ -118,4 +118,13 @@ class AdminTicketController extends Controller
 
         return back()->with('status', 'Reply posted.');
     }
+
+    public function resolve(Request $request, Ticket $ticket): RedirectResponse
+    {
+        $this->authorize('manage', $ticket);
+
+        $ticket->update(['status' => TicketStatus::Resolved]);
+
+        return back()->with('status', 'Ticket marked as resolved.');
+    }
 }

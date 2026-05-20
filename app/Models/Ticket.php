@@ -20,6 +20,7 @@ class Ticket extends Model
         'priority',
         'attachment_path',
         'due_at',
+        'sla_breached_at',
         'rating',
         'rating_comment',
     ];
@@ -27,10 +28,11 @@ class Ticket extends Model
     protected function casts(): array
     {
         return [
-            'status'   => TicketStatus::class,
-            'priority' => TicketPriority::class,
-            'due_at'   => 'datetime',
-            'rating'   => 'integer',
+            'status'          => TicketStatus::class,
+            'priority'        => TicketPriority::class,
+            'due_at'          => 'datetime',
+            'sla_breached_at' => 'datetime',
+            'rating'          => 'integer',
         ];
     }
 

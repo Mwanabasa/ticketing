@@ -42,7 +42,7 @@ class AdminTicketController extends Controller
             'closed'      => $counts[TicketStatus::Closed->value] ?? 0,
         ];
 
-        $query = Ticket::query()->with(['user', 'category', 'assignee']);
+        $query = Ticket::query()->with(['user', 'category', 'assignee'])->withSum('timeEntries', 'duration_minutes');
 
         if ($request->filled('status')) {
             $query->where('status', $request->string('status'));
@@ -150,12 +150,23 @@ class AdminTicketController extends Controller
         return back()->with('status', 'Reply posted.');
     }
 
+    public function destroy(Ticket $ticket): RedirectResponse
+    {
+        $this->authorize('manage', $ticket);
+
+        $ticket->delete();
+
+        Cache::forget('open_ticket_count');
+
+        return redirect()->route('admin.tickets.index')->with('status', 'Ticket #'.$ticket->id.' deleted.');
+    }
+
     public function bulkUpdate(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'ticket_ids'   => ['required', 'array'],
             'ticket_ids.*' => ['exists:tickets,id'],
-            'action'       => ['required', 'in:assign_status,assign_priority,close'],
+            'action'       => ['required', 'in:assign_status,assign_priority,close,assign_staff'],
             'status'       => ['nullable', Rule::enum(TicketStatus::class)],
             'priority'     => ['nullable', Rule::enum(TicketPriority::class)],
             'assigned_to'  => ['nullable', 'exists:users,id'],
@@ -167,9 +178,10 @@ class AdminTicketController extends Controller
             $this->authorize('manage', $ticket);
 
             match ($validated['action']) {
-                'assign_status'    => $ticket->update(['status'   => $validated['status']   ?? $ticket->status]),
-                'assign_priority'  => $ticket->update(['priority' => $validated['priority'] ?? $ticket->priority]),
-                'close'            => $ticket->update(['status'   => TicketStatus::Closed]),
+                'assign_status'  => $ticket->update(['status'      => $validated['status']      ?? $ticket->status]),
+                'assign_priority'=> $ticket->update(['priority'    => $validated['priority']    ?? $ticket->priority]),
+                'close'          => $ticket->update(['status'      => TicketStatus::Closed]),
+                'assign_staff'   => $ticket->update(['assigned_to' => $validated['assigned_to'] ?? $ticket->assigned_to]),
             };
         }
 
@@ -209,6 +221,10 @@ class AdminTicketController extends Controller
             $this->authorize('manage', $sourceTicket);
             $sourceTicket->replies()->update(['ticket_id' => $targetTicket->id]);
             $sourceTicket->timeEntries()->update(['ticket_id' => $targetTicket->id]);
+            // Transfer attachment if target has none
+            if (! $targetTicket->attachment_path && $sourceTicket->attachment_path) {
+                $targetTicket->update(['attachment_path' => $sourceTicket->attachment_path]);
+            }
             $sourceTicket->update([
                 'status'      => TicketStatus::Closed,
                 'description' => $sourceTicket->description."\n\n[Merged into ticket #{$targetTicket->id}]",

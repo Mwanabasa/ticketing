@@ -16,11 +16,15 @@ class TicketReplyObserver
         $ticket = $reply->ticket;
 
         if ($reply->user->isStaff() && $reply->user_id !== $ticket->user_id) {
-            Mail::to($ticket->user)->send(new TicketReplyNotification($ticket, $reply));
+            try {
+                Mail::to($ticket->user)->send(new TicketReplyNotification($ticket, $reply));
+            } catch (\Throwable) {}
         }
 
         if ($reply->user->isStudent() && $ticket->assigned_to) {
-            Mail::to($ticket->assignee)->send(new TicketReplyNotification($ticket, $reply));
+            try {
+                Mail::to($ticket->assignee)->send(new TicketReplyNotification($ticket, $reply));
+            } catch (\Throwable) {}
         }
 
         AuditLog::query()->create([
