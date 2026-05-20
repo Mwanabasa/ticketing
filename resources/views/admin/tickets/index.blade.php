@@ -4,7 +4,7 @@
 @section('page_title', 'Tickets')
 @section('page_subtitle', 'Manage and respond to support requests')
 
-@push('head')
+@push('scripts')
 <script>
 function updateBulkBar() {
     const checked = document.querySelectorAll('.ticket-checkbox:checked');

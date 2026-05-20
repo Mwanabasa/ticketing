@@ -259,5 +259,6 @@
     <footer class="relative z-10 border-t py-6 text-center text-xs text-gray-400 font-medium" style="background:rgba(255,255,255,0.6);border-color:rgba(99,102,241,0.1);">© {{ date('Y') }} Student IT Help Desk · All rights reserved</footer>
 </div>
 @endauth
+@stack('scripts')
 </body>
 </html>

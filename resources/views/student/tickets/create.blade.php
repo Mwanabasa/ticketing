@@ -23,13 +23,13 @@
     @endif
 
     {{-- Form card --}}
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
-        <div class="px-6 py-5 border-b border-slate-100">
+    <div class="bg-[#f4f5fb] rounded-2xl border border-slate-200 shadow-sm">
+        <div class="px-6 py-5 border-b border-slate-200">
             <h2 class="font-semibold text-slate-900">Ticket details</h2>
             <p class="text-xs text-slate-400 mt-0.5">Fill in the details below. The more info you provide, the faster we can help.</p>
         </div>
 
-        <form method="POST" action="{{ route('student.tickets.store') }}" enctype="multipart/form-data" class="p-6 space-y-5">
+        <form method="POST" action="{{ route('student.tickets.store') }}" enctype="multipart/form-data" class="p-6 space-y-5" data-loading>
             @csrf
 
             <div class="grid sm:grid-cols-2 gap-5">
@@ -75,7 +75,8 @@
                 <label for="description" class="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
                 <textarea id="description" name="description" rows="6" required
                     placeholder="Describe your issue in detail — what happened, what you expected, any error messages…"
-                    class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition resize-none @error('description') border-red-400 @enderror">{{ old('description') }}</textarea>
+                    data-maxlength="5000"
+                    class="w-full rounded-lg border border-slate-200 bg-[#eceef6] px-3 py-2.5 text-sm focus:border-indigo-400 focus:bg-[#f4f5fb] focus:outline-none focus:ring-2 focus:ring-indigo-100 transition resize-none @error('description') border-red-400 @enderror">{{ old('description') }}</textarea>
                 @error('description') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
             </div>
 
@@ -90,9 +91,9 @@
                 </div>
             </div>
 
-            <div class="flex gap-3 pt-2 border-t border-slate-100">
-                <button type="submit"
-                        class="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition">
+            <div class="flex gap-3 pt-2 border-t border-slate-200">
+                <button type="submit" class="btn btn-primary" data-loading-text="Submitting…">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     Submit ticket
                 </button>
                 <a href="{{ route('student.tickets.index') }}"
@@ -105,7 +106,7 @@
 </div>
 
 @if ($templates->isNotEmpty())
-    @push('head')
+    @push('scripts')
     <script>
     const templates = @json($templates->keyBy('id'));
     function applyTemplate(id, btn) {
@@ -121,12 +122,13 @@
         btn.classList.add('bg-indigo-600','text-white','border-indigo-600');
         btn.classList.remove('bg-white','text-indigo-700','border-indigo-200');
         document.getElementById('subject').focus();
+        document.getElementById('subject').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     </script>
     @endpush
 @endif
 
-@push('head')
+@push('scripts')
 <script>
 let kbTimer;
 function searchKB(query) {
@@ -135,7 +137,7 @@ function searchKB(query) {
     const results = document.getElementById('kb-results');
     if (query.length < 4) { box.classList.add('hidden'); return; }
     kbTimer = setTimeout(() => {
-        fetch('/knowledge-base?q=' + encodeURIComponent(query) + '&_format=json')
+        fetch('/api/knowledge-base/search?q=' + encodeURIComponent(query))
             .then(r => r.json())
             .then(data => {
                 if (!data.length) { box.classList.add('hidden'); return; }

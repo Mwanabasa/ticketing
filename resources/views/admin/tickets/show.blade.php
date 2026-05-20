@@ -4,6 +4,28 @@
 @section('page_title', 'Ticket #'.$ticket->id)
 @section('page_subtitle', $ticket->subject)
 
+@push('scripts')
+<style>
+.pri-low    { color:#6b7280;font-weight:600;font-size:11px; }
+.pri-medium { color:#2563eb;font-weight:600;font-size:11px; }
+.pri-high   { color:#d97706;font-weight:700;font-size:11px; }
+.pri-urgent { color:#dc2626;font-weight:700;font-size:11px; }
+.av { width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const attach = document.getElementById('admin-attach');
+    const name   = document.getElementById('admin-attach-name');
+    if (attach && name) {
+        attach.addEventListener('change', () => {
+            name.textContent = attach.files.length ? '✔ ' + attach.files[0].name : '';
+            name.classList.toggle('hidden', !attach.files.length);
+        });
+    }
+});
+</script>
+@endpush
+
 @section('content')
 
     {{-- Back + actions --}}
@@ -135,14 +157,20 @@
             @if ($ticket->status !== \App\Enums\TicketStatus::Closed)
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
                     <p class="text-sm font-semibold text-slate-900 mb-3">Reply to student</p>
-                    <form method="POST" action="{{ route('admin.tickets.replies.store', $ticket) }}" enctype="multipart/form-data" class="space-y-3">
+                    <form method="POST" action="{{ route('admin.tickets.replies.store', $ticket) }}" enctype="multipart/form-data" class="space-y-3" data-loading>
                         @csrf
                         <textarea name="body" rows="4" required placeholder="Type your reply…"
                             class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition resize-none">{{ old('body') }}</textarea>
                         <div class="flex items-center justify-between gap-3">
-                            <input type="file" name="attachment" accept="image/*,application/pdf"
-                                   class="text-sm text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-700 hover:file:bg-slate-200 transition">
-                            <button type="submit" class="shrink-0 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition">
+                            <label class="flex items-center gap-2">
+                                <input type="file" name="attachment" accept="image/*,application/pdf" class="sr-only" id="admin-attach">
+                                <label for="admin-attach" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                    Attach file
+                                </label>
+                                <span id="admin-attach-name" class="text-xs text-indigo-600 font-medium hidden"></span>
+                            </label>
+                            <button type="submit" data-loading-text="Sending…" class="shrink-0 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition">
                                 Send reply
                             </button>
                         </div>
@@ -206,8 +234,47 @@
 
             {{-- Info --}}
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-                <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Ticket info</p>
-                <dl class="space-y-2.5 text-sm">
+                <p class="text-[10px] font-bold uppercase tracking-widest mb-4" style="color:#94a3b8;">Ticket info</p>
+
+                {{-- Requester card --}}
+                <div class="mb-4">
+                    <p class="text-[10px] font-bold uppercase tracking-widest mb-2" style="color:#94a3b8;">Requester</p>
+                    @php
+                        $avatarColors = ['#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981','#3b82f6','#ef4444'];
+                        $sc = $avatarColors[crc32($ticket->user->name) % count($avatarColors)];
+                    @endphp
+                    <div class="flex items-center gap-2.5 rounded-lg p-2.5" style="background:#f8fafc;border:1px solid #f1f5f9;">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:{{ $sc }};">
+                            {{ strtoupper(substr($ticket->user->name, 0, 1)) }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold text-gray-800 truncate">{{ $ticket->user->name }}</p>
+                            <p class="text-[10px] truncate" style="color:#94a3b8;">{{ $ticket->user->email }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Agent card --}}
+                <div class="mb-4">
+                    <p class="text-[10px] font-bold uppercase tracking-widest mb-2" style="color:#94a3b8;">Agent</p>
+                    @if ($ticket->assignee)
+                        @php $ac = $avatarColors[crc32($ticket->assignee->name) % count($avatarColors)]; @endphp
+                        <div class="flex items-center gap-2.5 rounded-lg p-2.5" style="background:#f8fafc;border:1px solid #f1f5f9;">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:{{ $ac }};">
+                                {{ strtoupper(substr($ticket->assignee->name, 0, 1)) }}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold text-gray-800 truncate">{{ $ticket->assignee->name }}</p>
+                                <p class="text-[10px] truncate" style="color:#94a3b8;">{{ $ticket->assignee->email }}</p>
+                            </div>
+                        </div>
+                    @else
+                        <p class="text-xs font-medium" style="color:#ef4444;">No agent assigned</p>
+                    @endif
+                </div>
+
+                {{-- Other meta --}}
+                <dl class="space-y-2.5 text-sm" style="border-top:1px solid #f1f5f9;padding-top:12px;">
                     @foreach ([
                         ['Student',      $ticket->user->name],
                         ['Email',        $ticket->user->email],
@@ -267,7 +334,9 @@
                     @csrf
                     <input type="hidden" name="target_ticket_id" value="{{ $ticket->id }}">
                     <input type="text" name="merge_ids_raw" placeholder="e.g. 12, 15, 20"
-                           class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 mb-2">
+                           pattern="[\d,\s]+" title="Comma-separated ticket IDs (numbers only)"
+                           class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 mb-1">
+                    <p class="text-[10px] text-slate-400 mb-2">Numbers only, comma-separated.</p>
                     <button type="submit" class="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition">
                         Merge into this ticket
                     </button>
