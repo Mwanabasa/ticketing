@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'home')->name('home');
 
 Route::get('/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('knowledge-base.index');
+Route::get('/knowledge-base/search', [KnowledgeBaseController::class, 'search'])->name('knowledge-base.search');
 Route::get('/knowledge-base/{article}', [KnowledgeBaseController::class, 'show'])->name('knowledge-base.show');
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -85,11 +86,12 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
 
     // Tickets
     Route::get('/tickets', [AdminTicketController::class, 'index'])->name('tickets.index');
-    Route::get('/tickets/{ticket}', [AdminTicketController::class, 'show'])->name('tickets.show');
-    Route::patch('/tickets/{ticket}', [AdminTicketController::class, 'update'])->name('tickets.update');
-    Route::post('/tickets/{ticket}/replies', [AdminTicketController::class, 'reply'])->name('tickets.replies.store');
     Route::post('/tickets/bulk', [AdminTicketController::class, 'bulkUpdate'])->name('tickets.bulk');
     Route::post('/tickets/merge', [AdminTicketController::class, 'merge'])->name('tickets.merge');
+    Route::get('/tickets/{ticket}', [AdminTicketController::class, 'show'])->name('tickets.show');
+    Route::patch('/tickets/{ticket}', [AdminTicketController::class, 'update'])->name('tickets.update');
+    Route::delete('/tickets/{ticket}', [AdminTicketController::class, 'destroy'])->name('tickets.destroy');
+    Route::post('/tickets/{ticket}/replies', [AdminTicketController::class, 'reply'])->name('tickets.replies.store');
 
     // Time entries
     Route::get('/tickets/{ticket}/time-entries', [TimeEntryController::class, 'index'])->name('time-entries.index');

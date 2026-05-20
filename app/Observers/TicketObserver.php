@@ -24,18 +24,21 @@ class TicketObserver
 
         $this->logAction('updated', $ticket, $old ?: null, $new ?: null);
 
+        // Track SLA breach
+        if ($ticket->isOverdue() && ! $ticket->sla_breached_at) {
+            $ticket->timestamps = false;
+            $ticket->updateQuietly(['sla_breached_at' => now()]);
+            $ticket->timestamps = true;
+        }
+
         if ($ticket->wasChanged('assigned_to') && $ticket->assigned_to && $ticket->assignee) {
-            try {
-                Mail::to($ticket->assignee)->send(new TicketAssignedNotification($ticket));
-            } catch (\Throwable) {}
+            Mail::to($ticket->assignee)->queue(new TicketAssignedNotification($ticket));
         }
 
         if ($ticket->wasChanged('status')) {
             $oldStatus = $ticket->getOriginal('status');
             $oldVal    = $oldStatus instanceof \App\Enums\TicketStatus ? $oldStatus->value : (string) $oldStatus;
-            try {
-                Mail::to($ticket->user)->send(new TicketStatusChangedNotification($ticket, $oldVal, $ticket->status->value));
-            } catch (\Throwable) {}
+            Mail::to($ticket->user)->queue(new TicketStatusChangedNotification($ticket, $oldVal, $ticket->status->value));
         }
     }
 

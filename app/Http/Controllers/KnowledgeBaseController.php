@@ -41,6 +41,17 @@ class KnowledgeBaseController extends Controller
         return view('knowledge-base.index', compact('articles', 'categories'));
     }
 
+    public function search(Request $request): JsonResponse
+    {
+        $articles = KnowledgeBaseArticle::query()
+            ->where('is_published', true)
+            ->where('title', 'like', '%'.$request->string('q')->trim().'%')
+            ->limit(5)
+            ->get(['id', 'title', 'slug']);
+
+        return response()->json($articles);
+    }
+
     public function show(KnowledgeBaseArticle $article): View
     {
         if (! $article->is_published) {
