@@ -199,8 +199,12 @@ class AdminTicketController extends Controller
 
         $validated = $request->validate([
             'source_ticket_ids'   => ['required', 'array', 'min:1'],
-            'source_ticket_ids.*' => ['exists:tickets,id'],
+            'source_ticket_ids.*' => ['integer', 'exists:tickets,id'],
             'target_ticket_id'    => ['required', 'exists:tickets,id'],
+        ], [
+            'source_ticket_ids.required'   => 'Please enter at least one ticket ID to merge.',
+            'source_ticket_ids.*.exists'   => 'One or more ticket IDs do not exist.',
+            'source_ticket_ids.*.integer'  => 'Ticket IDs must be numbers.',
         ]);
 
         $targetTicket = Ticket::query()->findOrFail($validated['target_ticket_id']);
