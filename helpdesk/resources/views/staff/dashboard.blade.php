@@ -66,9 +66,20 @@
                             {{ $ticket->user->name }} · {{ $ticket->category->name }}
                         </p>
                     </div>
-                    <span class="inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-semibold {{ $ticket->status->badgeClass() }}">
-                        {{ $ticket->status->label() }}
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-semibold {{ $ticket->status->badgeClass() }}">
+                            {{ $ticket->status->label() }}
+                        </span>
+                        @if ($ticket->status !== \App\Enums\TicketStatus::Resolved && $ticket->status !== \App\Enums\TicketStatus::Closed)
+                            <form method="POST" action="{{ route('staff.tickets.resolve', $ticket) }}">
+                                @csrf
+                                @method('PATCH')
+                                <a href="#" onclick="event.preventDefault(); this.closest('form').submit();" class="inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm">
+                                    Resolve
+                                </a>
+                            </form>
+                        @endif
+                    </div>
                 </li>
             @empty
                 <li class="px-5 py-10 text-center text-sm text-slate-500">

@@ -35,6 +35,7 @@ Route::middleware(['auth', 'role:student'])->group(function (): void {
 Route::middleware(['auth', 'role:staff'])->prefix('staff')->name('staff.')->group(function (): void {
     Route::get('/dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
     Route::get('/tickets/{ticket}', [AdminTicketController::class, 'show'])->name('tickets.show');
+    Route::patch('/tickets/{ticket}/resolve', [AdminTicketController::class, 'resolve'])->name('tickets.resolve');
     Route::post('/tickets/{ticket}/replies', [AdminTicketController::class, 'reply'])->name('tickets.replies.store');
 });
 
