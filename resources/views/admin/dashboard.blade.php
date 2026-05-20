@@ -164,6 +164,62 @@
                 </a>
             </div>
         </div>
+
+        {{-- Unassigned tickets --}}
+        <div class="card lg:col-span-3 flex flex-col">
+            <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                <div>
+                    <h3 class="font-bold text-gray-900">Unassigned Tickets</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Open and pending tickets with no assigned staff</p>
+                </div>
+                <a href="{{ route('admin.tickets.index', ['assigned_to' => 'unassigned']) }}"
+                   class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition">View all &rarr;</a>
+            </div>
+            @if ($unassignedTickets->isEmpty())
+                <div class="px-6 py-12 text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-50 mb-3">
+                        <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-600">All tickets are assigned</p>
+                    <p class="text-xs text-gray-400 mt-1">Great work! No unassigned tickets in the queue.</p>
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead style="background:#f8fafc;border-bottom:1px solid #f1f5f9;">
+                            <tr>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-400">Ticket</th>
+                                <th class="hidden sm:table-cell px-5 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-400">Student</th>
+                                <th class="hidden sm:table-cell px-5 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-400">Category</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-400">Priority</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-400">Opened</th>
+                                <th class="px-5 py-3"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            @foreach ($unassignedTickets as $ticket)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3.5">
+                                        <span class="text-xs font-mono text-gray-400 mr-1">#{{ $ticket->id }}</span>
+                                        <span class="font-semibold text-gray-900">{{ Str::limit($ticket->subject, 40) }}</span>
+                                    </td>
+                                    <td class="hidden sm:table-cell px-5 py-3.5 text-xs text-gray-500">{{ $ticket->user->name }}</td>
+                                    <td class="hidden sm:table-cell px-5 py-3.5 text-xs text-gray-500">{{ $ticket->category->name }}</td>
+                                    <td class="px-5 py-3.5">
+                                        <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $ticket->priority->badgeClass() }}">{{ $ticket->priority->label() }}</span>
+                                    </td>
+                                    <td class="px-5 py-3.5 text-xs text-gray-400">{{ $ticket->created_at->diffForHumans() }}</td>
+                                    <td class="px-5 py-3.5">
+                                        <a href="{{ route('admin.tickets.show', $ticket) }}" class="btn btn-secondary btn-xs">Assign &rarr;</a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+
     </div>
 
 @endsection

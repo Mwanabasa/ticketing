@@ -20,7 +20,7 @@ class StoreTicketRequest extends FormRequest
             'subject' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'max:10000'],
             'priority' => ['required', Rule::enum(TicketPriority::class)],
-            'attachment' => ['nullable', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
+            'attachment' => ['nullable', 'mimes:jpg,jpeg,png,gif,pdf', 'max:2048'],
         ];
     }
 }

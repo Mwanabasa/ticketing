@@ -12,8 +12,18 @@ class EnsureUserRole
     {
         $user = $request->user();
 
-        if (! $user || $user->role->value !== $role) {
-            abort(Response::HTTP_FORBIDDEN);
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        if ($user->role->value !== $role) {
+            $message = 'You do not have permission to access that area.';
+
+            if ($user->isStaff()) {
+                return redirect()->route('admin.dashboard')->with('status', $message);
+            }
+
+            return redirect()->route('student.dashboard')->with('status', $message);
         }
 
         return $next($request);

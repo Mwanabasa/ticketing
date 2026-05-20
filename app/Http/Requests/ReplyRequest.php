@@ -15,7 +15,7 @@ class ReplyRequest extends FormRequest
     {
         return [
             'body'       => ['required', 'string', 'max:10000'],
-            'attachment' => ['nullable', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
+            'attachment' => ['nullable', 'mimes:jpg,jpeg,png,gif,pdf', 'max:2048'],
         ];
     }
 }

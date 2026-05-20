@@ -33,6 +33,14 @@ class AdminDashboardController extends Controller
             ->limit(8)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'recentTickets'));
+        $unassignedTickets = Ticket::query()
+            ->with(['user', 'category'])
+            ->whereNull('assigned_to')
+            ->whereIn('status', [TicketStatus::Open, TicketStatus::Pending])
+            ->latest()
+            ->limit(8)
+            ->get();
+
+        return view('admin.dashboard', compact('stats', 'recentTickets', 'unassignedTickets'));
     }
 }

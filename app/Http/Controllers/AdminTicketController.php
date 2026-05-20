@@ -137,12 +137,19 @@ class AdminTicketController extends Controller
 
         $validated = $request->validated();
 
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('tickets', 'public');
+        }
+
         $ticket->replies()->create([
-            'user_id' => $request->user()->id,
-            'body'    => $validated['body'],
+            'user_id'         => $request->user()->id,
+            'body'            => $validated['body'],
+            'attachment_path' => $attachmentPath,
         ]);
 
-        if ($ticket->status === TicketStatus::Open) {
+        // Reopen closed ticket when staff replies
+        if (in_array($ticket->status, [TicketStatus::Open, TicketStatus::Closed])) {
             $ticket->update(['status' => TicketStatus::Pending]);
             Cache::forget('open_ticket_count');
         }

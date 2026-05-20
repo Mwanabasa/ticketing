@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
                 </form>
             @endif
-            @if ($ticket->status !== \App\Enums\TicketStatus::Closed)
+            {{-- reply form always shown to staff --}}
                 <form method="POST" action="{{ route('admin.tickets.update', $ticket) }}"
                       onsubmit="return confirm('Close this ticket?')">
                     @csrf @method('PATCH')
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             @endif
 
             {{-- Reply form --}}
-            @if ($ticket->status !== \App\Enums\TicketStatus::Closed)
+            {{-- reply form always shown to staff --}}
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
                     <p class="text-sm font-semibold text-slate-900 mb-3">Reply to student</p>
                     <form method="POST" action="{{ route('admin.tickets.replies.store', $ticket) }}" enctype="multipart/form-data" class="space-y-3" data-loading>
@@ -186,10 +186,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </form>
                 </div>
-            @else
-                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center text-sm text-slate-400">
-                    This ticket is closed. No further replies can be added.
-                </div>
+            @if ($ticket->status === \App\Enums\TicketStatus::Closed)
+                <div class="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs font-medium text-amber-700">This ticket is closed. Your reply will reopen it to pending.</div>
             @endif
         </div>
 
